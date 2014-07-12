@@ -124,7 +124,7 @@ public class ChooseMemberActivity extends Activity {
 						message.what = code;
 						myHandler.sendMessage(message);
 					} catch (Exception e) {
-						e.printStackTrace();
+						e.printStackTrace(System.err);
 						myHandler.sendEmptyMessage(GlobalUtil.MSG_LOAD_FAILED);
 					}
 

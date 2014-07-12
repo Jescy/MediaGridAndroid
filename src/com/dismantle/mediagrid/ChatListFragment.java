@@ -153,7 +153,7 @@ public class ChatListFragment extends Fragment {
 						message.what = code;
 						myHandler.sendMessage(message);
 					} catch (Exception e) {
-						e.printStackTrace();
+						e.printStackTrace(System.err);
 						myHandler.sendEmptyMessage(GlobalUtil.MSG_LOAD_FAILED);
 					}
 

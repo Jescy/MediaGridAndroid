@@ -1,7 +1,12 @@
 package com.dismantle.mediagrid;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +65,46 @@ public class CouchDB {
 		return resJson;
 	}
 
+	// POST /media/_design/media/_update/file
+	// params: type, dir
+	public static JSONObject createFileDocument(String dir) throws JSONException
+	{
+		String url = "/media/_design/media/_update/file";
+		List<NameValuePair> args=new ArrayList<NameValuePair>();
+		args.add(new BasicNameValuePair("type", "FILE"));
+		args.add(new BasicNameValuePair("dir", dir));
+
+		httpService.doPostForm(url, args);
+		JSONObject resJson = new JSONObject();
+		String id= httpService.getHeader("X-Couch-Id");
+		String rev= httpService.getHeader("X-Couch-Update-NewRev");
+		resJson.put("id", id);
+		resJson.put("rev", rev);
+		return resJson;
+	}
+	
+	// POST	/media/{id}?_attachments={name}&_rev={rev}
+	// params payload
+	public static JSONObject upload(String id,String rev,String path) throws Exception
+	{
+		JSONObject resJson=null;
+		File file= new File(path);
+		if(!file.exists())
+		{
+			resJson=new JSONObject();
+			resJson.put("error", "file not found");
+			return resJson;
+		}
+		String url = "/media/"+id+"?";
+		url+="_attachments="+file.getName();
+		url+="&_rev="+rev;
+		resJson=httpService.doPostFile(url, rev, file);
+		return resJson;
+	}
+	
+	
+	
+	
 	// PUT /_users/org.couchdb.user:name
 	// params:_id,name,password,roles,type
 	public static JSONObject register(String name, String passowrd, String type)

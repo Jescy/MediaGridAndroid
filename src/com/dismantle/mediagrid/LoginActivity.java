@@ -38,10 +38,19 @@ public class LoginActivity extends ActionBarActivity {
 							
 							Date date=new Date();
 							//login test
-							res = CouchDB.login("admin", "jtgpgf");
+//							res = CouchDB.login("admin", "jtgpgf");
+//							assert(!res.has("error"));
+//							//get session test
+//							res = CouchDB.getSession();
+//							assert(!res.has("error"));
+//							
+							res = CouchDB.createFileDocument("dd");
 							assert(!res.has("error"));
-							//get session test
-							res = CouchDB.getSession();
+							
+							String id=res.getString("id");
+							String rev=res.getString("rev");
+							
+							res=CouchDB.upload(id, rev, "/ueventd.rc");
 							assert(!res.has("error"));
 //							//get file list test
 //							res = CouchDB.getFiles(true, true, null);
@@ -63,7 +72,7 @@ public class LoginActivity extends ActionBarActivity {
 //							handler.sendMessage(msg);
 							//res = CouchDB.createDir("mytest_"+date.getMinutes()+"_"+date.getSeconds(), null, "DIR", date.toGMTString());
 						} catch (Exception e) {
-							e.printStackTrace();
+							e.printStackTrace(System.err);
 						}
 						
 

@@ -50,7 +50,7 @@ public class GlobalUtil {
 			md5.update(toencode);
 			return HexEncode(md5.digest());
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		return "";
 	}

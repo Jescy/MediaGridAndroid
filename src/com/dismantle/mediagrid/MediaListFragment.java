@@ -66,9 +66,10 @@ public class MediaListFragment extends Fragment {
 		datalist = new ArrayList<Map<String, Object>>();
 
 		adapter = new SimpleAdapter(thisActivity, datalist,
-				R.layout.media_list_item, new String[] { "file_name",
+				R.layout.media_list_item, new String[] { "file_ico","file_name",
 						"file_size", "upload_time" }, new int[] {
-						R.id.file_name, R.id.file_size, R.id.upload_time });
+						R.id.file_ico, R.id.file_name, R.id.file_size,
+						R.id.upload_time });
 		pullListView.setAdapter(adapter);
 
 		currentKey.clear();
@@ -140,9 +141,10 @@ public class MediaListFragment extends Fragment {
 																keysToPath(),
 																new Date()
 																		.toLocaleString());
-												myHandler.sendEmptyMessage(GlobalUtil.MSG_CREATE_DIR_SUCCESS);
+												myHandler
+														.sendEmptyMessage(GlobalUtil.MSG_CREATE_DIR_SUCCESS);
 											} catch (JSONException e) {
-												e.printStackTrace();
+												e.printStackTrace(System.err);
 											}
 										}
 
@@ -160,9 +162,11 @@ public class MediaListFragment extends Fragment {
 	}
 
 	private boolean isLegalName(String inputString) {
-		Pattern pattern = Pattern.compile("^w+$");
+		Pattern pattern = Pattern.compile("^\\w+$");
 		Matcher macher = pattern.matcher(inputString);
-		return macher.find();
+		boolean ret = macher.find();
+
+		return ret;
 	}
 
 	private String keysToPath() {
@@ -236,6 +240,7 @@ public class MediaListFragment extends Fragment {
 						map.put("id", "");
 						map.put("file_name", "..");
 						map.put("type", "DIR");
+						map.put("file_ico", R.drawable.folder_ico);
 						map.put("upload_time", "");
 						map.put("file_url", "");
 						map.put("file_size", "---------");
@@ -254,10 +259,14 @@ public class MediaListFragment extends Fragment {
 						map.put("type", jsonValue.getString("type"));
 						map.put("upload_time", jsonValue.getString("time"));
 						map.put("file_url", jsonValue.getString("fileurl"));
-						if (fileSize.equals("-"))
+						if (fileSize.equals("-")){
 							map.put("file_size", "---------");
-						else
+							map.put("file_ico", R.drawable.folder_ico);
+						}
+						else{
 							map.put("file_size", fileSize + "B");
+							map.put("file_ico", R.drawable.file_ico);
+						}
 						dList.add(map);
 					}
 					Message message = new Message();
@@ -267,7 +276,7 @@ public class MediaListFragment extends Fragment {
 					message.what = GlobalUtil.MSG_LOAD_SUCCESS;
 					myHandler.sendMessage(message);
 				} catch (Exception e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 					myHandler.sendEmptyMessage(GlobalUtil.MSG_LOAD_FAILED);
 				}
 
