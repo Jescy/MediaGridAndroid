@@ -14,14 +14,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.SimpleCursorAdapter.ViewBinder;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -50,6 +54,8 @@ public class MediaListFragment extends Fragment {
 	private Button btnMakeDir = null;
 	private Button btnUpload = null;
 
+	Dialog openFileDialog = null;
+
 	public MediaListFragment() {
 	}
 
@@ -66,8 +72,8 @@ public class MediaListFragment extends Fragment {
 		datalist = new ArrayList<Map<String, Object>>();
 
 		adapter = new SimpleAdapter(thisActivity, datalist,
-				R.layout.media_list_item, new String[] { "file_ico","file_name",
-						"file_size", "upload_time" }, new int[] {
+				R.layout.media_list_item, new String[] { "file_ico",
+						"file_name", "file_size", "upload_time" }, new int[] {
 						R.id.file_ico, R.id.file_name, R.id.file_size,
 						R.id.upload_time });
 		pullListView.setAdapter(adapter);
@@ -113,51 +119,8 @@ public class MediaListFragment extends Fragment {
 			}
 		});
 
-		btnMakeDir.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				final EditText inputServer = new EditText(thisActivity);
-				AlertDialog.Builder builder = new AlertDialog.Builder(
-						thisActivity);
-				builder.setTitle("Input directory name")
-						.setIcon(android.R.drawable.ic_dialog_info)
-						.setView(inputServer).setNegativeButton("Cancel", null);
-				builder.setPositiveButton("Ok",
-						new DialogInterface.OnClickListener() {
-
-							public void onClick(DialogInterface dialog,
-									int which) {
-								final String name = inputServer.getText()
-										.toString();
-								if (isLegalName(name)) {
-									new Thread() {
-										@Override
-										public void run() {
-											try {
-												JSONObject resJson = CouchDB
-														.createDir(
-																name,
-																keysToPath(),
-																new Date()
-																		.toLocaleString());
-												myHandler
-														.sendEmptyMessage(GlobalUtil.MSG_CREATE_DIR_SUCCESS);
-											} catch (JSONException e) {
-												e.printStackTrace(System.err);
-											}
-										}
-
-									}.start();
-
-								} else {
-
-								}
-							}
-						});
-				builder.show();
-			}
-		});
+		btnUpload.setOnClickListener(new UploadOnclickListener());
+		btnMakeDir.setOnClickListener(new MakeDirOnclickListener());
 		return rootView;
 	}
 
@@ -212,7 +175,15 @@ public class MediaListFragment extends Fragment {
 				break;
 			case GlobalUtil.MSG_CREATE_DIR_SUCCESS:
 				loadFiles();
+				Toast.makeText(getActivity(),
+						getResources().getString(R.string.makedir_success),
+						Toast.LENGTH_SHORT).show();
 				break;
+			case GlobalUtil.MSG_UPLOAD_SUCCESS:
+				loadFiles();
+				Toast.makeText(getActivity(),
+						getResources().getString(R.string.upload_success),
+						Toast.LENGTH_SHORT).show();
 			default:
 				break;
 			}
@@ -259,11 +230,10 @@ public class MediaListFragment extends Fragment {
 						map.put("type", jsonValue.getString("type"));
 						map.put("upload_time", jsonValue.getString("time"));
 						map.put("file_url", jsonValue.getString("fileurl"));
-						if (fileSize.equals("-")){
+						if (fileSize.equals("-")) {
 							map.put("file_size", "---------");
 							map.put("file_ico", R.drawable.folder_ico);
-						}
-						else{
+						} else {
 							map.put("file_size", fileSize + "B");
 							map.put("file_ico", R.drawable.file_ico);
 						}
@@ -283,5 +253,111 @@ public class MediaListFragment extends Fragment {
 			}
 		}).start();
 		updateNavigation();
+	}
+
+	private class MakeDirOnclickListener implements View.OnClickListener {
+		@Override
+		public void onClick(View arg0) {
+			final EditText inputServer = new EditText(getActivity());
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			builder.setTitle("Input directory name")
+					.setIcon(android.R.drawable.ic_dialog_info)
+					.setView(inputServer).setNegativeButton("Cancel", null);
+			builder.setPositiveButton("Ok",
+					new DialogInterface.OnClickListener() {
+
+						public void onClick(DialogInterface dialog, int which) {
+							final String name = inputServer.getText()
+									.toString();
+							if (isLegalName(name)) {
+								new Thread() {
+									@Override
+									public void run() {
+										try {
+											JSONObject resJson = CouchDB
+													.createDir(
+															name,
+															keysToPath(),
+															new Date()
+																	.toLocaleString());
+											if (!resJson.has("error"))
+												myHandler
+														.sendEmptyMessage(GlobalUtil.MSG_CREATE_DIR_SUCCESS);
+											else
+												myHandler
+														.sendEmptyMessage(GlobalUtil.MSG_CREATE_DIR_FAILED);
+										} catch (JSONException e) {
+											e.printStackTrace(System.err);
+										}
+									}
+
+								}.start();
+
+							} else {
+
+							}
+						}
+					});
+			builder.show();
+		}
+
+	}
+
+	private class UploadOnclickListener implements View.OnClickListener {
+
+		@Override
+		public void onClick(View arg0) {
+			Map<String, Integer> images = new HashMap<String, Integer>();
+			// 下面几句设置各文件类型的图标， 需要你先把图标添加到资源文件夹
+			images.put(OpenFileDialog.sRoot, R.drawable.folder_ico); // 根目录图标
+			images.put(OpenFileDialog.sParent, R.drawable.folder_ico); // 返回上一层的图标
+			images.put(OpenFileDialog.sFolder, R.drawable.folder_ico); // 文件夹图标
+			images.put("wav", R.drawable.file_ico); // wav文件图标
+			images.put(OpenFileDialog.sEmpty, R.drawable.file_ico);
+
+			openFileDialog = OpenFileDialog.createDialog(0, getActivity(),
+					"choose a file", new CallbackBundle() {
+
+						@Override
+						public void callback(Bundle bundle) {
+							openFileDialog.dismiss();
+							final String path = bundle.getString("path");
+							Toast.makeText(getActivity(), path,
+									Toast.LENGTH_SHORT).show();
+
+							new Thread() {
+
+								@Override
+								public void run() {
+									try {
+										JSONObject resJson = CouchDB
+												.createFileDocument(keysToPath());
+										String id = resJson.getString("id");
+										String rev = resJson.getString("rev");
+
+										resJson = CouchDB.upload(id, rev, path);
+										if (!resJson.has("error"))
+											myHandler
+													.sendEmptyMessage(GlobalUtil.MSG_UPLOAD_SUCCESS);
+										else
+											myHandler
+													.sendEmptyMessage(GlobalUtil.MSG_UPLOAD_FAILED);
+									} catch (Exception e) {
+										myHandler
+												.sendEmptyMessage(GlobalUtil.MSG_UPLOAD_FAILED);
+										e.printStackTrace(System.err);
+									}
+								}
+
+							}.start();
+
+						}
+					}, null, images);
+			openFileDialog.show();
+			WindowManager.LayoutParams layoutParams = openFileDialog
+					.getWindow().getAttributes();
+			layoutParams.height = LayoutParams.MATCH_PARENT;
+			openFileDialog.getWindow().setAttributes(layoutParams);
+		}
 	}
 }

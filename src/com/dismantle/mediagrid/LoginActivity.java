@@ -44,14 +44,14 @@ public class LoginActivity extends ActionBarActivity {
 //							res = CouchDB.getSession();
 //							assert(!res.has("error"));
 //							
-							res = CouchDB.createFileDocument("dd");
-							assert(!res.has("error"));
-							
-							String id=res.getString("id");
-							String rev=res.getString("rev");
-							
-							res=CouchDB.upload(id, rev, "/ueventd.rc");
-							assert(!res.has("error"));
+//							res = CouchDB.createFileDocument("dd");
+//							assert(!res.has("error"));
+//							
+//							String id=res.getString("id");
+//							String rev=res.getString("rev");
+//							
+//							res=CouchDB.upload(id, rev, "/ueventd.rc");
+//							assert(!res.has("error"));
 //							//get file list test
 //							res = CouchDB.getFiles(true, true, null);
 //							assert(!res.has("error"));
