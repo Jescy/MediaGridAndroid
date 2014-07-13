@@ -3,6 +3,13 @@ package com.dismantle.mediagrid;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -110,14 +117,17 @@ public class HttpService {
 		}
 		return jsonObject;
 	}
-	//for those only supporting application/x-www-form-urlencoded, I dont know why the application/json is not working
+
+	// for those only supporting application/x-www-form-urlencoded, I dont know
+	// why the application/json is not working
 	public JSONObject doPostForm(String url, List<NameValuePair> args) {
 		HttpPost httppost = new HttpPost(baseURL + url);
 		JSONObject jsonObject = null;
 		try {
-			httppost.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-			httppost.setEntity(new UrlEncodedFormEntity(args,"UTF-8")); // execute
-																// post
+			httppost.setHeader("Content-Type",
+					"application/x-www-form-urlencoded; charset=UTF-8");
+			httppost.setEntity(new UrlEncodedFormEntity(args, "UTF-8")); // execute
+			// post
 			httpResponse = httpClient.execute(httppost);
 			String resultString = EntityUtils
 					.toString(httpResponse.getEntity());
@@ -129,6 +139,7 @@ public class HttpService {
 		}
 		return jsonObject;
 	}
+
 	public JSONObject doPut(String url, JSONObject args) {
 		HttpPut httpput = new HttpPut(baseURL + url);
 		JSONObject jsonObject = null;
@@ -154,8 +165,6 @@ public class HttpService {
 		final String endline = "--" + BOUNDARY + "--\r\n";// 数据结束标志
 		JSONObject jsonObject = null;
 		try {
-			// write file data
-			int fileDataLength = 0;
 			// file discription
 			StringBuilder fileExplain = new StringBuilder();
 			fileExplain.append("--");
@@ -167,9 +176,6 @@ public class HttpService {
 			fileExplain
 					.append("Content-Type: application/octet-stream\r\n\r\n");
 			fileExplain.append("\r\n");
-			fileDataLength += fileExplain.length();
-			fileDataLength += uploadFile.length();
-
 			arrayOutputStream.write(fileExplain.toString().getBytes());
 
 			byte[] buffer = new byte[1024];
@@ -201,10 +207,11 @@ public class HttpService {
 			HttpPost httpPost = new HttpPost(baseURL + url);
 			httpPost.setHeader("Content-Type", "multipart/form-data; boundary="
 					+ BOUNDARY);
-			//httpPost.setHeader("Content-Length", String.valueOf(dataLength));
+			// httpPost.setHeader("Content-Length", String.valueOf(dataLength));
 			httpPost.setHeader("Connection", "Keep-Alive");
 			httpPost.setHeader("Cache-Control", "max-age=0");
-			httpPost.setHeader("Referer",baseURL+"/media/_design/media/files.html");
+			httpPost.setHeader("Referer", baseURL
+					+ "/media/_design/media/files.html");
 			httpPost.setEntity(arrayEntity);
 			httpResponse = httpClient.execute(httpPost);
 			String resultString = EntityUtils
@@ -214,6 +221,33 @@ public class HttpService {
 			e.printStackTrace(System.err);
 		}
 		return jsonObject;
+	}
+
+	public boolean doDownloadFile(String url, String path)  {
+		try {
+
+			File file = new File(path);
+			if(file.exists())
+			{
+				file.delete();
+			}
+			URL urlURL = new URL(baseURL + url);
+			URLConnection con = urlURL.openConnection();
+
+			InputStream is = con.getInputStream();
+			byte[] bs = new byte[1024];
+			int len;
+			OutputStream os = new FileOutputStream(file);
+			while ((len = is.read(bs)) != -1) {
+				os.write(bs, 0, len);
+			}
+			os.close();
+			is.close();
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+			return false;
+		}
+		return true;
 	}
 
 	public String getHeader(String headerName) {

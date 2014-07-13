@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.R.bool;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -55,6 +56,7 @@ public class MediaListFragment extends Fragment {
 	private Button btnUpload = null;
 
 	Dialog openFileDialog = null;
+	Dialog downFileDialog = null;
 
 	public MediaListFragment() {
 	}
@@ -97,13 +99,53 @@ public class MediaListFragment extends Fragment {
 				}
 				Map<String, Object> item = datalist.get(realID);
 				String type = item.get("type").toString();
-				String fileurl = item.get("file_url").toString();
+				final String fileurl = item.get("file_url").toString();
+				final String filename=item.get("file_name").toString();
 				if (type.equals("DIR")) {
 					currentKey.add(fileurl);
 					loadFiles();
 				} else if (type.equals("FILE")) {
 					Toast.makeText(thisActivity, fileurl, Toast.LENGTH_SHORT)
 							.show();
+					downFileDialog = OpenFileDialog.createDialog(getActivity(),
+							"choose a directory", new CallbackBundle() {
+
+								@Override
+								public void callback(Bundle bundle) {
+									downFileDialog.dismiss();
+									final String path = bundle.getString("path");
+
+									new Thread() {
+
+										@Override
+										public void run() {
+											try {
+												boolean resDownload=false;
+												resDownload = CouchDB.doDownloadFile("/media/"+fileurl, path+"/"+filename);
+												if (resDownload)
+													myHandler
+															.sendEmptyMessage(GlobalUtil.MSG_DOWNLOAD_SUCCESS);
+												else
+													myHandler
+															.sendEmptyMessage(GlobalUtil.MSG_DOWNLOAD_FAILED);
+											} catch (Exception e) {
+												myHandler
+														.sendEmptyMessage(GlobalUtil.MSG_DOWNLOAD_FAILED);
+												e.printStackTrace(System.err);
+											}
+										}
+
+									}.start();
+
+								}
+							}, null, true);
+					downFileDialog.show();
+					WindowManager.LayoutParams layoutParams = downFileDialog
+							.getWindow().getAttributes();
+					layoutParams.height = LayoutParams.MATCH_PARENT;
+					downFileDialog.getWindow().setAttributes(layoutParams);
+					
+					//HttpService.getInstance().doDownloadFile(fileurl, path)
 				}
 			}
 
@@ -175,15 +217,30 @@ public class MediaListFragment extends Fragment {
 				break;
 			case GlobalUtil.MSG_CREATE_DIR_SUCCESS:
 				loadFiles();
-				Toast.makeText(getActivity(),
-						getResources().getString(R.string.makedir_success),
-						Toast.LENGTH_SHORT).show();
+				if (isAdded())
+					Toast.makeText(getActivity(),
+							getResources().getString(R.string.makedir_success),
+							Toast.LENGTH_SHORT).show();
 				break;
 			case GlobalUtil.MSG_UPLOAD_SUCCESS:
 				loadFiles();
-				Toast.makeText(getActivity(),
-						getResources().getString(R.string.upload_success),
-						Toast.LENGTH_SHORT).show();
+				if (isAdded())
+					Toast.makeText(getActivity(),
+							getResources().getString(R.string.upload_success),
+							Toast.LENGTH_SHORT).show();
+				break;
+			case GlobalUtil.MSG_DOWNLOAD_SUCCESS:
+				if (isAdded())
+					Toast.makeText(getActivity(),
+							getResources().getString(R.string.download_success),
+							Toast.LENGTH_SHORT).show();
+				break;
+			case GlobalUtil.MSG_DOWNLOAD_FAILED:
+				if (isAdded())
+					Toast.makeText(getActivity(),
+							getResources().getString(R.string.download_failed),
+							Toast.LENGTH_SHORT).show();
+				break;
 			default:
 				break;
 			}
@@ -307,23 +364,15 @@ public class MediaListFragment extends Fragment {
 
 		@Override
 		public void onClick(View arg0) {
-			Map<String, Integer> images = new HashMap<String, Integer>();
-			// 下面几句设置各文件类型的图标， 需要你先把图标添加到资源文件夹
-			images.put(OpenFileDialog.sRoot, R.drawable.folder_ico); // 根目录图标
-			images.put(OpenFileDialog.sParent, R.drawable.folder_ico); // 返回上一层的图标
-			images.put(OpenFileDialog.sFolder, R.drawable.folder_ico); // 文件夹图标
-			images.put("wav", R.drawable.file_ico); // wav文件图标
-			images.put(OpenFileDialog.sEmpty, R.drawable.file_ico);
+			
 
-			openFileDialog = OpenFileDialog.createDialog(0, getActivity(),
+			openFileDialog = OpenFileDialog.createDialog(getActivity(),
 					"choose a file", new CallbackBundle() {
 
 						@Override
 						public void callback(Bundle bundle) {
 							openFileDialog.dismiss();
 							final String path = bundle.getString("path");
-							Toast.makeText(getActivity(), path,
-									Toast.LENGTH_SHORT).show();
 
 							new Thread() {
 
@@ -352,7 +401,7 @@ public class MediaListFragment extends Fragment {
 							}.start();
 
 						}
-					}, null, images);
+					}, null, false);
 			openFileDialog.show();
 			WindowManager.LayoutParams layoutParams = openFileDialog
 					.getWindow().getAttributes();

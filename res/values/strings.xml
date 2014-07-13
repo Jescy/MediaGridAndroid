@@ -45,4 +45,14 @@
     <string name="switch_room">Switch room</string>
     <string name="log_out">Log out</string>
     <string name="about">About MediaGrid</string>
+    
+    <!-- promotion message -->
+    <string name="upload_success">Upload file success.</string>
+    <string name="upload_failed">Upload file failed.</string>
+    <string name="makedir_success">Make directory success.</string>
+    <string name="makedir_failed">Make directory failed.</string>
+    <string name="load_success">Load files success.</string>
+    <string name="load_failed">Load files failed.</string>
+    <string name="download_success">download files success.</string>
+    <string name="download_failed">download files failed.</string>
 </resources>

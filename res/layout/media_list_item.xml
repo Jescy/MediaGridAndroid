@@ -7,7 +7,7 @@
 
     <ImageView
         android:contentDescription="@string/user_photo"
-        android:id="@+id/user_photo"
+        android:id="@+id/file_ico"
         android:layout_width="0dp"
         android:layout_height="35dp"
         android:layout_margin="5dp"

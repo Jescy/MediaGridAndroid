@@ -30,6 +30,8 @@ public class GlobalUtil {
 	public static final int MSG_CREATE_DIR_FAILED = 4;
 	public static final int MSG_UPLOAD_SUCCESS = 5;
 	public static final int MSG_UPLOAD_FAILED = 6;
+	public static final int MSG_DOWNLOAD_SUCCESS = 7;
+	public static final int MSG_DOWNLOAD_FAILED = 8;
 	
 	public static final String source_code="source_code";
 	public static final String data="data";

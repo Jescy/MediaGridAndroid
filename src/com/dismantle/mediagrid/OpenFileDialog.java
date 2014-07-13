@@ -15,11 +15,15 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
@@ -34,28 +38,69 @@ public class OpenFileDialog {
 	static final public String sDefault = sRoot + "/MediaGrid";
 	static final private String sOnErrorMsg = "No rights to access!";
 
-	// 参数说明
-	// context:上下文
-	// dialogid:对话框ID
-	// title:对话框标题
-	// callback:一个传递Bundle参数的回调接口
-	// suffix:需要选择的文件后缀，比如需要选择wav、mp3文件的时候设置为".wav;.mp3;"，注意最后需要一个分号(;)
-	// images:用来根据后缀显示的图标资源ID。
-	// 根目录图标的索引为sRoot;
-	// 父目录的索引为sParent;
-	// 文件夹的索引为sFolder;
-	// 默认图标的索引为sEmpty;
-	// 其他的直接根据后缀进行索引，比如.wav文件图标的索引为"wav"
-	public static Dialog createDialog(int id, Context context, String title,
-			CallbackBundle callback, String suffix, Map<String, Integer> images) {
+	/**
+	 * 
+	 * @param context
+	 *            context
+	 * @param title
+	 *            title for dialog
+	 * @param callback
+	 *            callback when something is selected
+	 * @param suffix
+	 *            only shows files with specified suffix
+	 * @param selDirectory
+	 *            Selection for directory or file.
+	 * @param images
+	 *            image icons
+	 * @return
+	 */
+	public static Dialog createDialog(Context context, String title,
+			final CallbackBundle callback, String suffix, boolean selDirectory) {
+		Map<String, Integer> images = new HashMap<String, Integer>();
+		// 下面几句设置各文件类型的图标， 需要你先把图标添加到资源文件夹
+		images.put(OpenFileDialog.sRoot, R.drawable.folder_ico); // 根目录图标
+		images.put(OpenFileDialog.sParent, R.drawable.folder_ico); // 返回上一层的图标
+		images.put(OpenFileDialog.sFolder, R.drawable.folder_ico); // 文件夹图标
+		images.put("wav", R.drawable.file_ico); // wav文件图标
+		images.put(OpenFileDialog.sEmpty, R.drawable.file_ico);
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		FileSelectView fileSelectView = new FileSelectView(context, id,
-				callback, suffix, images);
+		final FileSelectView fileSelectView = new FileSelectView(context,
+				callback, suffix, selDirectory, images);
 
-		builder.setView(fileSelectView);
+		if (selDirectory) {
+			RelativeLayout relativeLayout = new RelativeLayout(context);
+			Button btnOK = new Button(context);
+			btnOK.setText("Select this directory");
+			btnOK.setId(12345678);
+			btnOK.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View arg0) {
+					Bundle bundle = new Bundle();
+					bundle.putString("path", fileSelectView.path);
+
+					callback.callback(bundle);
+				}
+			});
+			RelativeLayout.LayoutParams btnLayoutParams = new RelativeLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT);
+			btnLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM,
+					RelativeLayout.TRUE);
+			relativeLayout.addView(btnOK, btnLayoutParams);
+			RelativeLayout.LayoutParams lstLayoutParams = new RelativeLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.MATCH_PARENT);
+			int id = btnOK.getId();
+			lstLayoutParams.addRule(RelativeLayout.ABOVE, btnOK.getId());
+			relativeLayout.addView(fileSelectView, lstLayoutParams);
+			builder.setView(relativeLayout);
+		} else {
+
+			builder.setView(fileSelectView);
+		}
 
 		Dialog dialog = builder.create();
-		// dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		dialog.setTitle(title);
 		return dialog;
 	}
@@ -65,22 +110,21 @@ public class OpenFileDialog {
 		private CallbackBundle callback = null;
 		private String path = sDefault;
 		private List<Map<String, Object>> list = null;
-		private int dialogid = 0;
 
 		private String suffix = null;
 
 		private Map<String, Integer> imagemap = null;
 		private Context context;
+		private boolean selDirecotry;
 
-		public FileSelectView(Context context, int dialogid,
-				CallbackBundle callback, String suffix,
-				Map<String, Integer> images) {
+		public FileSelectView(Context context, CallbackBundle callback,
+				String suffix, boolean selDirecotry, Map<String, Integer> images) {
 			super(context);
 			this.imagemap = images;
 			this.suffix = suffix == null ? "" : suffix.toLowerCase();
 			this.callback = callback;
-			this.dialogid = dialogid;
 			this.context = context;
+			this.selDirecotry = selDirecotry;
 			this.setOnItemClickListener(this);
 
 			File file = new File(path);
@@ -174,7 +218,8 @@ public class OpenFileDialog {
 			}
 
 			list.addAll(lfolders); // 先添加文件夹，确保文件夹显示在上面
-			list.addAll(lfiles); // 再添加文件
+			if (!selDirecotry)
+				list.addAll(lfiles); // 再添加文件
 
 			SimpleAdapter adapter = new SimpleAdapter(
 					getContext(),
@@ -190,6 +235,7 @@ public class OpenFileDialog {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View v, int position,
 				long id) {
+
 			// 条目选择
 			String pt = (String) list.get(position).get("path");
 			String fn = (String) list.get(position).get("name");
@@ -205,8 +251,11 @@ public class OpenFileDialog {
 					path = sRoot;
 				}
 			} else {
+				
 				File fl = new File(pt);
 				if (fl.isFile()) {
+					if (selDirecotry)
+						return;
 					// 设置回调的返回值
 					Bundle bundle = new Bundle();
 					bundle.putString("path", pt);

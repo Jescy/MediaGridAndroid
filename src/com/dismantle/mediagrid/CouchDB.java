@@ -72,7 +72,8 @@ public class CouchDB {
 		String url = "/media/_design/media/_update/file";
 		List<NameValuePair> args=new ArrayList<NameValuePair>();
 		args.add(new BasicNameValuePair("type", "FILE"));
-		args.add(new BasicNameValuePair("dir", dir));
+		if(dir!=null)
+			args.add(new BasicNameValuePair("dir", dir));
 
 		httpService.doPostForm(url, args);
 		JSONObject resJson = new JSONObject();
@@ -83,6 +84,10 @@ public class CouchDB {
 		return resJson;
 	}
 	
+	public static boolean doDownloadFile(String url, String path)
+	{
+		return httpService.doDownloadFile(url, path);
+	}
 	// POST	/media/{id}?_attachments={name}&_rev={rev}
 	// params payload
 	public static JSONObject upload(String id,String rev,String path) throws Exception
