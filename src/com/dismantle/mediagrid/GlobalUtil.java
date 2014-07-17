@@ -41,6 +41,7 @@ public class GlobalUtil {
 	public static final int MSG_POLLING_USER = 15;
 	public static final int MSG_POLLING_CHAT = 16;
 	public static final int MSG_POLLING_IM = 17;
+	public static final int MSG_CHAT_LIST = 18;
 	
 	public static final String source_code="source_code";
 	public static final String data="data";

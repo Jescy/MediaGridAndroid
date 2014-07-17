@@ -143,27 +143,13 @@ public class ChatListFragment extends Fragment {
 		return rootView;
 	}
 
-	// 结果处理
+	// message handler
 	private Handler myHandler = new Handler() {
 
 		@Override
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
-			ArrayList<Map<String, Object>> data = (ArrayList<Map<String, Object>>) msg
-					.getData().getSerializable("data");
-			if (data != null && data.size() != 0) {
-				if (msg.what == GlobalUtil.MSG_LOAD_SUCCESS)
-					mDatalist.clear();
-
-				mDatalist.addAll(data);
-			}
 			switch (msg.what) {
-			case GlobalUtil.MSG_LOAD_SUCCESS:
-				mAdapter.notifyDataSetChanged();
-				mPullListView.onRefreshComplete();
-				mPullListView.setSelectionAfterHeaderView();
-
-				break;
 			case GlobalUtil.MSG_SAVE_USER_DOC_SUCCESS:
 				getSequenceNumber();
 				break;
@@ -178,8 +164,20 @@ public class ChatListFragment extends Fragment {
 
 				break;
 			case GlobalUtil.MSG_POLLING_CHAT:
-				getMessages((JSONObject) msg.obj);
-				int c=0;
+				JSONObject jsonObject = (JSONObject) msg.obj;
+				try {
+					mUpdateSeq = jsonObject.getInt("last_seq");
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				getMessages(jsonObject);
+				break;
+			case GlobalUtil.MSG_CHAT_LIST:
+				List<Map<String, Object>> msgs=(List<Map<String,Object>>)msg.obj;
+				mDatalist.addAll(msgs);
+				mAdapter.notifyDataSetChanged();
+				mPullListView.setSelection(mPullListView.getBottom());
+				longPollingChat(mUpdateSeq);
 				break;
 			default:
 				break;
@@ -359,13 +357,39 @@ public class ChatListFragment extends Fragment {
 					JSONObject resJson = CouchDB.getMsgs(mUser.room,
 							mUser.username, firstMsg, lastMsg);
 					JSONArray rows=resJson.getJSONArray("rows");
+					
+					ArrayList<Map<String, Object>> msgs=new ArrayList<Map<String,Object>>();
 					for(int i=0;i<rows.length();i++)
 					{
-						JSONObject msg=rows.getJSONObject(i);
+						JSONObject jsonObject=rows.getJSONObject(i);
+						JSONObject value = jsonObject.getJSONObject("value");
+						JSONObject message= value.getJSONObject("message");
+						JSONObject to= message.getJSONObject(mUser.username);
+//						JSONObject jsonMSG = jsonArray.getJSONObject(i);
+//						Map<String, Object> map = new HashMap<String, Object>();
+//						map.put("chat_from", jsonMSG.get("chat_from"));
+//						map.put("chat_to", jsonMSG.get("chat_to"));
+//						map.put("chat_time", jsonMSG.get("chat_time"));
+//						map.put("chat_msg", jsonMSG.get("chat_msg"));
 						//deal with each message
+						String chat_from = value.getString("nick");
+						String chat_to = mUser.username;
+						String chat_time = String.valueOf(value.getLong("created_at"));
+						String chat_msg = to.getString("msg");
+						
+						Map<String, Object> map = new HashMap<String, Object>();
+						map.put("chat_from", chat_from);
+						map.put("chat_to", chat_to);
+						map.put("chat_time", chat_time);
+						map.put("chat_msg", chat_msg);
+						msgs.add(map);
 					}
+					Message msg=new Message();
+					msg.what = GlobalUtil.MSG_CHAT_LIST;
+					msg.obj = msgs;
+					myHandler.sendMessage(msg);
 				} catch (JSONException e) {
-
+					e.printStackTrace(System.err);
 				}
 			}
 
