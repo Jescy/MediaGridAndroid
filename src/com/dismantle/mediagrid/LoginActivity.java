@@ -7,13 +7,13 @@ import org.json.JSONObject;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.Toast;
 
 public class LoginActivity extends ActionBarActivity {
 	
@@ -25,8 +25,7 @@ public class LoginActivity extends ActionBarActivity {
 		btnOK.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-				startActivity(intent);
+				
 				new Thread() {
 					
 					@Override
@@ -38,12 +37,16 @@ public class LoginActivity extends ActionBarActivity {
 							
 							Date date=new Date();
 							//login test
-//							res = CouchDB.login("admin", "jtgpgf");
-//							assert(!res.has("error"));
+							res = CouchDB.login("admin", "jtgpgf");
+							assert(!res.has("error"));
 //							//get session test
-//							res = CouchDB.getSession();
-//							assert(!res.has("error"));
+							res = CouchDB.getSession();
+							assert(!res.has("error"));
 //							
+							res=CouchDB.getUserDoc("admin");
+							assert(!res.has("error"));
+							
+							
 //							res = CouchDB.createFileDocument("dd");
 //							assert(!res.has("error"));
 //							
@@ -66,10 +69,10 @@ public class LoginActivity extends ActionBarActivity {
 //							
 //							
 //							
-//							Message msg = new Message();
-//							msg.obj=res;
-//							msg.what =0;
-//							handler.sendMessage(msg);
+							Message msg = new Message();
+							msg.obj=res;
+							msg.what =GlobalUtil.MSG_LOAD_SUCCESS;
+							handler.sendMessage(msg);
 							//res = CouchDB.createDir("mytest_"+date.getMinutes()+"_"+date.getSeconds(), null, "DIR", date.toGMTString());
 						} catch (Exception e) {
 							e.printStackTrace(System.err);
@@ -107,8 +110,10 @@ public class LoginActivity extends ActionBarActivity {
 	{
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
-			case 0:
-				Toast.makeText(getApplicationContext(), "ddd:"+msg.obj.toString(), Toast.LENGTH_LONG).show();
+			case GlobalUtil.MSG_LOAD_SUCCESS:
+				Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+				intent.putExtra("userDoc", msg.obj.toString());
+				startActivity(intent);
 				break;
 
 			default:

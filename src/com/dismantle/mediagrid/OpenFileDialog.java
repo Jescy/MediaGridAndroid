@@ -30,13 +30,13 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class OpenFileDialog {
 	public static String tag = "OpenFileDialog";
-	static final public String sRoot = Environment
+	static final public String mPathRoot = Environment
 			.getExternalStorageDirectory().getPath();
-	static final public String sParent = "..";
-	static final public String sFolder = ".";
-	static final public String sEmpty = "";
-	static final public String sDefault = sRoot + "/MediaGrid";
-	static final private String sOnErrorMsg = "No rights to access!";
+	static final public String mPathParent = "..";
+	static final public String mPathFolder = ".";
+	static final public String mPathEmpty = "";
+	static final public String mPathDefault = mPathRoot + "/MediaGrid";
+	static final private String mMsgError = "No rights to access!";
 
 	/**
 	 * 
@@ -57,12 +57,12 @@ public class OpenFileDialog {
 	public static Dialog createDialog(Context context, String title,
 			final CallbackBundle callback, String suffix, boolean selDirectory) {
 		Map<String, Integer> images = new HashMap<String, Integer>();
-		// 下面几句设置各文件类型的图标， 需要你先把图标添加到资源文件夹
-		images.put(OpenFileDialog.sRoot, R.drawable.folder_ico); // 根目录图标
-		images.put(OpenFileDialog.sParent, R.drawable.folder_ico); // 返回上一层的图标
-		images.put(OpenFileDialog.sFolder, R.drawable.folder_ico); // 文件夹图标
-		images.put("wav", R.drawable.file_ico); // wav文件图标
-		images.put(OpenFileDialog.sEmpty, R.drawable.file_ico);
+
+		images.put(OpenFileDialog.mPathRoot, R.drawable.folder_ico); 
+		images.put(OpenFileDialog.mPathParent, R.drawable.folder_ico);
+		images.put(OpenFileDialog.mPathFolder, R.drawable.folder_ico);
+		images.put("wav", R.drawable.file_ico); 
+		images.put(OpenFileDialog.mPathEmpty, R.drawable.file_ico);
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		final FileSelectView fileSelectView = new FileSelectView(context,
 				callback, suffix, selDirectory, images);
@@ -77,7 +77,7 @@ public class OpenFileDialog {
 				@Override
 				public void onClick(View arg0) {
 					Bundle bundle = new Bundle();
-					bundle.putString("path", fileSelectView.path);
+					bundle.putString("path", fileSelectView.mPath);
 
 					callback.callback(bundle);
 				}
@@ -107,27 +107,27 @@ public class OpenFileDialog {
 
 	static class FileSelectView extends ListView implements OnItemClickListener {
 
-		private CallbackBundle callback = null;
-		private String path = sDefault;
-		private List<Map<String, Object>> list = null;
+		private CallbackBundle mCallback = null;
+		private String mPath = mPathDefault;
+		private List<Map<String, Object>> mList = null;
 
-		private String suffix = null;
+		private String mSuffix = null;
 
-		private Map<String, Integer> imagemap = null;
-		private Context context;
-		private boolean selDirecotry;
+		private Map<String, Integer> mImagemap = null;
+		private Context mContext;
+		private boolean mSelDirecotry;
 
 		public FileSelectView(Context context, CallbackBundle callback,
 				String suffix, boolean selDirecotry, Map<String, Integer> images) {
 			super(context);
-			this.imagemap = images;
-			this.suffix = suffix == null ? "" : suffix.toLowerCase();
-			this.callback = callback;
-			this.context = context;
-			this.selDirecotry = selDirecotry;
+			this.mImagemap = images;
+			this.mSuffix = suffix == null ? "" : suffix.toLowerCase();
+			this.mCallback = callback;
+			this.mContext = context;
+			this.mSelDirecotry = selDirecotry;
 			this.setOnItemClickListener(this);
 
-			File file = new File(path);
+			File file = new File(mPath);
 			if (!file.exists())
 				file.mkdirs();
 			refreshFileList();
@@ -143,12 +143,12 @@ public class OpenFileDialog {
 		}
 
 		private int getImageId(String s) {
-			if (imagemap == null) {
+			if (mImagemap == null) {
 				return 0;
-			} else if (imagemap.containsKey(s)) {
-				return imagemap.get(s);
-			} else if (imagemap.containsKey(sEmpty)) {
-				return imagemap.get(sEmpty);
+			} else if (mImagemap.containsKey(s)) {
+				return mImagemap.get(s);
+			} else if (mImagemap.containsKey(mPathEmpty)) {
+				return mImagemap.get(mPathEmpty);
 			} else {
 				return 0;
 			}
@@ -158,39 +158,39 @@ public class OpenFileDialog {
 			// 刷新文件列表
 			File[] files = null;
 			try {
-				files = new File(path).listFiles();
+				files = new File(mPath).listFiles();
 			} catch (Exception e) {
 				files = null;
 			}
 			if (files == null) {
 				// 访问出错
-				Toast.makeText(getContext(), sOnErrorMsg, Toast.LENGTH_SHORT)
+				Toast.makeText(getContext(), mMsgError, Toast.LENGTH_SHORT)
 						.show();
 				return -1;
 			}
-			if (list != null) {
-				list.clear();
+			if (mList != null) {
+				mList.clear();
 			} else {
-				list = new ArrayList<Map<String, Object>>(files.length);
+				mList = new ArrayList<Map<String, Object>>(files.length);
 			}
 
 			// 用来先保存文件夹和文件夹的两个列表
 			ArrayList<Map<String, Object>> lfolders = new ArrayList<Map<String, Object>>();
 			ArrayList<Map<String, Object>> lfiles = new ArrayList<Map<String, Object>>();
 
-			if (!this.path.equals(sRoot)) {
+			if (!this.mPath.equals(mPathRoot)) {
 				// 添加根目录 和 上一层目录
 				Map<String, Object> map = new HashMap<String, Object>();
-				map.put("name", sRoot);
-				map.put("path", sRoot);
-				map.put("img", getImageId(sRoot));
-				list.add(map);
+				map.put("name", mPathRoot);
+				map.put("path", mPathRoot);
+				map.put("img", getImageId(mPathRoot));
+				mList.add(map);
 
 				map = new HashMap<String, Object>();
-				map.put("name", sParent);
-				map.put("path", path);
-				map.put("img", getImageId(sParent));
-				list.add(map);
+				map.put("name", mPathParent);
+				map.put("path", mPath);
+				map.put("img", getImageId(mPathParent));
+				mList.add(map);
 			}
 
 			for (File file : files) {
@@ -199,14 +199,14 @@ public class OpenFileDialog {
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("name", file.getName());
 					map.put("path", file.getPath());
-					map.put("img", getImageId(sFolder));
+					map.put("img", getImageId(mPathFolder));
 					lfolders.add(map);
 				} else if (file.isFile()) {
 					// 添加文件
 					String sf = getSuffix(file.getName()).toLowerCase();
-					if (suffix == null
-							|| suffix.length() == 0
-							|| (sf.length() > 0 && suffix.indexOf("." + sf
+					if (mSuffix == null
+							|| mSuffix.length() == 0
+							|| (sf.length() > 0 && mSuffix.indexOf("." + sf
 									+ ";") >= 0)) {
 						Map<String, Object> map = new HashMap<String, Object>();
 						map.put("name", file.getName());
@@ -217,13 +217,13 @@ public class OpenFileDialog {
 				}
 			}
 
-			list.addAll(lfolders); // 先添加文件夹，确保文件夹显示在上面
-			if (!selDirecotry)
-				list.addAll(lfiles); // 再添加文件
+			mList.addAll(lfolders); // 先添加文件夹，确保文件夹显示在上面
+			if (!mSelDirecotry)
+				mList.addAll(lfiles); // 再添加文件
 
 			SimpleAdapter adapter = new SimpleAdapter(
 					getContext(),
-					list,
+					mList,
 					R.layout.file_dialog_item,
 					new String[] { "img", "name", "path" },
 					new int[] { R.id.filedialogitem_img,
@@ -237,36 +237,36 @@ public class OpenFileDialog {
 				long id) {
 
 			// 条目选择
-			String pt = (String) list.get(position).get("path");
-			String fn = (String) list.get(position).get("name");
-			if (fn.equals(sRoot) || fn.equals(sParent)) {
+			String pt = (String) mList.get(position).get("path");
+			String fn = (String) mList.get(position).get("name");
+			if (fn.equals(mPathRoot) || fn.equals(mPathParent)) {
 				// 如果是更目录或者上一层
 				File fl = new File(pt);
 				String ppt = fl.getParent();
 				if (ppt != null) {
 					// 返回上一层
-					path = ppt;
+					mPath = ppt;
 				} else {
 					// 返回更目录
-					path = sRoot;
+					mPath = mPathRoot;
 				}
 			} else {
 				
 				File fl = new File(pt);
 				if (fl.isFile()) {
-					if (selDirecotry)
+					if (mSelDirecotry)
 						return;
 					// 设置回调的返回值
 					Bundle bundle = new Bundle();
 					bundle.putString("path", pt);
 					bundle.putString("name", fn);
 					// 调用事先设置的回调函数
-					this.callback.callback(bundle);
+					this.mCallback.callback(bundle);
 					return;
 				} else if (fl.isDirectory()) {
 					// 如果是文件夹
 					// 那么进入选中的文件夹
-					path = pt;
+					mPath = pt;
 				}
 			}
 			this.refreshFileList();

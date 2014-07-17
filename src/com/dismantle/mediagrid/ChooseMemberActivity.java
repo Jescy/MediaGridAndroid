@@ -20,11 +20,11 @@ import android.widget.SimpleAdapter;
 import com.dismantle.mediagrid.RTPullListView.OnRefreshListener;
 
 public class ChooseMemberActivity extends Activity {
-	private RTPullListView pullListView;
+	private RTPullListView mPullListView;
 
-	List<Map<String, Object>> datalist = null;
+	List<Map<String, Object>> mDatalist = null;
 	// private List<String> dataList;
-	private SimpleAdapter adapter;
+	private SimpleAdapter mAdapter;
 	
 	public ChooseMemberActivity() {
 	}
@@ -33,24 +33,24 @@ public class ChooseMemberActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.member_list);
-		pullListView = (RTPullListView) this.findViewById(R.id.member_list);
+		mPullListView = (RTPullListView) this.findViewById(R.id.member_list);
 
-		datalist = new ArrayList<Map<String, Object>>();
+		mDatalist = new ArrayList<Map<String, Object>>();
 
 		// adapter = new ArrayAdapter<String>(this,
 		// android.R.layout.simple_list_item_1, dataList);
-		adapter = new SimpleAdapter(this, datalist,
+		mAdapter = new SimpleAdapter(this, mDatalist,
 				R.layout.member_list_item, 
 				new String[] {"member_name"}, 
 				new int[] {R.id.member_name});
 		// setListAdapter(adapter);
-		pullListView.setAdapter(adapter);
+		mPullListView.setAdapter(mAdapter);
 
 
 
 		loadData(GlobalUtil.MSG_LOAD_SUCCESS,false);
 
-		pullListView.setOnItemClickListener(new OnItemClickListener() {
+		mPullListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1,
@@ -61,7 +61,7 @@ public class ChooseMemberActivity extends Activity {
 
 		});
 		// ÏÂÀ­Ë¢ÐÂ¼àÌýÆ÷
-		pullListView.setonRefreshListener(new OnRefreshListener() {
+		mPullListView.setonRefreshListener(new OnRefreshListener() {
 
 			@Override
 			public void onRefresh() {
@@ -82,15 +82,15 @@ public class ChooseMemberActivity extends Activity {
 						.getData().getSerializable("data");
 				if (data != null && data.size() != 0) {
 					if(msg.what==GlobalUtil.MSG_LOAD_SUCCESS)
-						datalist.clear();
+						mDatalist.clear();
 					
-					datalist.addAll(data);
+					mDatalist.addAll(data);
 				}
 				switch (msg.what) {
 				case GlobalUtil.MSG_LOAD_SUCCESS:
-					adapter.notifyDataSetChanged();
-					pullListView.onRefreshComplete();
-					pullListView.setSelectionAfterHeaderView();
+					mAdapter.notifyDataSetChanged();
+					mPullListView.onRefreshComplete();
+					mPullListView.setSelectionAfterHeaderView();
 					
 					break;
 				default:

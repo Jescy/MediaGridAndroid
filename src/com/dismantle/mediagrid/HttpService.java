@@ -39,12 +39,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class HttpService {
-	private String serverIP = "192.168.1.100";
-	private int serverPort = 5984;
-	private String baseURL = "http://" + serverIP + ":" + serverPort;
-	private static HttpService httpService = null;
-	private DefaultHttpClient httpClient = null;
-	private HttpResponse httpResponse = null;
+	private String mServerIP = "192.168.43.68";
+	private int mServerPort = 5984;
+	private String mBaseURL = "http://" + mServerIP + ":" + mServerPort;
+	private static HttpService mHttpService = null;
+	private DefaultHttpClient mHttpClient = null;
+	private HttpResponse mHttpResponse = null;
 
 	private HttpService() {
 		HttpParams params = new BasicHttpParams();
@@ -59,39 +59,39 @@ public class HttpService {
 				.getSocketFactory(), 80));
 		ClientConnectionManager conMgr = new ThreadSafeClientConnManager(
 				params, schReg);
-		httpClient = new DefaultHttpClient(conMgr, params);
+		mHttpClient = new DefaultHttpClient(conMgr, params);
 
 	}
 
 	public static HttpService getInstance() {
-		if (httpService == null)
-			httpService = new HttpService();
-		return httpService;
+		if (mHttpService == null)
+			mHttpService = new HttpService();
+		return mHttpService;
 	}
 
 	public HttpService setServer(String ip, int port) {
-		serverIP = ip;
-		serverPort = port;
-		baseURL = "http://" + serverIP + ":" + serverPort;
+		mServerIP = ip;
+		mServerPort = port;
+		mBaseURL = "http://" + mServerIP + ":" + mServerPort;
 		return getInstance();
 	}
 
 	public String getServerIP() {
-		return serverIP;
+		return mServerIP;
 	}
 
 	public int getServerPort() {
-		return serverPort;
+		return mServerPort;
 	}
 
 	public JSONObject doGet(String url) {
-		HttpGet httpGet = new HttpGet(baseURL + url);
+		HttpGet httpGet = new HttpGet(mBaseURL + url);
 		httpGet.setHeader("Content-Type", "application/json");
 		JSONObject jsonObject = null;
 		try {
-			httpResponse = httpClient.execute(httpGet);// execute get
+			mHttpResponse = mHttpClient.execute(httpGet);// execute get
 			String resultString = EntityUtils
-					.toString(httpResponse.getEntity());
+					.toString(mHttpResponse.getEntity());
 			jsonObject = new JSONObject(resultString);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
@@ -100,15 +100,15 @@ public class HttpService {
 	}
 
 	public JSONObject doPost(String url, JSONObject args) {
-		HttpPost httppost = new HttpPost(baseURL + url);
+		HttpPost httppost = new HttpPost(mBaseURL + url);
 		JSONObject jsonObject = null;
 		try {
 			httppost.setHeader("Content-Type", "application/json");
 			httppost.setEntity(new StringEntity(args.toString(), "UTF-8")); // execute
 																			// post
-			httpResponse = httpClient.execute(httppost);
+			mHttpResponse = mHttpClient.execute(httppost);
 			String resultString = EntityUtils
-					.toString(httpResponse.getEntity());
+					.toString(mHttpResponse.getEntity());
 			jsonObject = new JSONObject(resultString);
 		} catch (JSONException e) {
 			return null;
@@ -121,16 +121,16 @@ public class HttpService {
 	// for those only supporting application/x-www-form-urlencoded, I dont know
 	// why the application/json is not working
 	public JSONObject doPostForm(String url, List<NameValuePair> args) {
-		HttpPost httppost = new HttpPost(baseURL + url);
+		HttpPost httppost = new HttpPost(mBaseURL + url);
 		JSONObject jsonObject = null;
 		try {
 			httppost.setHeader("Content-Type",
 					"application/x-www-form-urlencoded; charset=UTF-8");
 			httppost.setEntity(new UrlEncodedFormEntity(args, "UTF-8")); // execute
 			// post
-			httpResponse = httpClient.execute(httppost);
+			mHttpResponse = mHttpClient.execute(httppost);
 			String resultString = EntityUtils
-					.toString(httpResponse.getEntity());
+					.toString(mHttpResponse.getEntity());
 			jsonObject = new JSONObject(resultString);
 		} catch (JSONException e) {
 			return null;
@@ -141,15 +141,15 @@ public class HttpService {
 	}
 
 	public JSONObject doPut(String url, JSONObject args) {
-		HttpPut httpput = new HttpPut(baseURL + url);
+		HttpPut httpput = new HttpPut(mBaseURL + url);
 		JSONObject jsonObject = null;
 		try {
 			httpput.setHeader("Content-Type", "application/json");
 			httpput.setEntity(new StringEntity(args.toString(), "UTF-8")); // execute
 																			// post
-			httpResponse = httpClient.execute(httpput);
+			mHttpResponse = mHttpClient.execute(httpput);
 			String resultString = EntityUtils
-					.toString(httpResponse.getEntity());
+					.toString(mHttpResponse.getEntity());
 			jsonObject = new JSONObject(resultString);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
@@ -204,18 +204,18 @@ public class HttpService {
 			ByteArrayEntity arrayEntity = new ByteArrayEntity(
 					arrayOutputStream.toByteArray());
 
-			HttpPost httpPost = new HttpPost(baseURL + url);
+			HttpPost httpPost = new HttpPost(mBaseURL + url);
 			httpPost.setHeader("Content-Type", "multipart/form-data; boundary="
 					+ BOUNDARY);
 			// httpPost.setHeader("Content-Length", String.valueOf(dataLength));
 			httpPost.setHeader("Connection", "Keep-Alive");
 			httpPost.setHeader("Cache-Control", "max-age=0");
-			httpPost.setHeader("Referer", baseURL
+			httpPost.setHeader("Referer", mBaseURL
 					+ "/media/_design/media/files.html");
 			httpPost.setEntity(arrayEntity);
-			httpResponse = httpClient.execute(httpPost);
+			mHttpResponse = mHttpClient.execute(httpPost);
 			String resultString = EntityUtils
-					.toString(httpResponse.getEntity());
+					.toString(mHttpResponse.getEntity());
 			jsonObject = new JSONObject(resultString);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
@@ -231,7 +231,7 @@ public class HttpService {
 			{
 				file.delete();
 			}
-			URL urlURL = new URL(baseURL + url);
+			URL urlURL = new URL(mBaseURL + url);
 			URLConnection con = urlURL.openConnection();
 
 			InputStream is = con.getInputStream();
@@ -251,7 +251,7 @@ public class HttpService {
 	}
 
 	public String getHeader(String headerName) {
-		Header[] headers = httpResponse.getHeaders(headerName);
+		Header[] headers = mHttpResponse.getHeaders(headerName);
 		if (headers.length == 0)
 			return null;
 

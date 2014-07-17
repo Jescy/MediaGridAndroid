@@ -32,6 +32,8 @@ public class GlobalUtil {
 	public static final int MSG_UPLOAD_FAILED = 6;
 	public static final int MSG_DOWNLOAD_SUCCESS = 7;
 	public static final int MSG_DOWNLOAD_FAILED = 8;
+	public static final int MSG_LOGIN_SUCCESS = 9;
+	public static final int MSG_LOGIN_FAILED = 10;
 	
 	public static final String source_code="source_code";
 	public static final String data="data";
@@ -65,5 +67,17 @@ public class GlobalUtil {
 		String created_at = formatter.format(curDate);
 		
 		return created_at;
+	}
+	public static String genPublicKey()
+	{
+		return "5NCfQnM3buZdfbH2nx7DG=7EJ=sj8Aj5JNqdNufJKD1";
+	}
+	public static String genPrivateKey()
+	{
+		return "18706104611734459693578797982023";
+	}
+	public static String genRandomPassword()
+	{
+		return "123456789";
 	}
 }

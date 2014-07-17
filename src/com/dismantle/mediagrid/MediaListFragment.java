@@ -44,19 +44,19 @@ import com.dismantle.mediagrid.RTPullListView.OnRefreshListener;
  */
 public class MediaListFragment extends Fragment {
 
-	private RTPullListView pullListView = null;
+	private RTPullListView mPullListView = null;
 
-	private TextView txtPath = null;
-	List<Map<String, Object>> datalist = null;
-	private SimpleAdapter adapter = null;
+	private TextView mTxtPath = null;
+	List<Map<String, Object>> mDatalist = null;
+	private SimpleAdapter mAdapter = null;
 
-	private Vector<String> currentKey = new Vector<String>();
+	private Vector<String> mCurrentKeys = new Vector<String>();
 
-	private Button btnMakeDir = null;
-	private Button btnUpload = null;
+	private Button mBtnMakeDir = null;
+	private Button mBtnUpload = null;
 
-	Dialog openFileDialog = null;
-	Dialog downFileDialog = null;
+	Dialog mUploadFileDialog = null;
+	Dialog mDownFileDialog = null;
 
 	public MediaListFragment() {
 	}
@@ -66,24 +66,24 @@ public class MediaListFragment extends Fragment {
 			Bundle savedInstanceState) {
 		final FragmentActivity thisActivity = getActivity();
 		View rootView = inflater.inflate(R.layout.media_list, container, false);
-		pullListView = (RTPullListView) rootView.findViewById(R.id.file_list);
-		txtPath = (TextView) rootView.findViewById(R.id.txt_path);
-		btnMakeDir = (Button) rootView.findViewById(R.id.btn_mkdir);
-		btnUpload = (Button) rootView.findViewById(R.id.btn_upload);
+		mPullListView = (RTPullListView) rootView.findViewById(R.id.file_list);
+		mTxtPath = (TextView) rootView.findViewById(R.id.txt_path);
+		mBtnMakeDir = (Button) rootView.findViewById(R.id.btn_mkdir);
+		mBtnUpload = (Button) rootView.findViewById(R.id.btn_upload);
 
-		datalist = new ArrayList<Map<String, Object>>();
+		mDatalist = new ArrayList<Map<String, Object>>();
 
-		adapter = new SimpleAdapter(thisActivity, datalist,
+		mAdapter = new SimpleAdapter(thisActivity, mDatalist,
 				R.layout.media_list_item, new String[] { "file_ico",
 						"file_name", "file_size", "upload_time" }, new int[] {
 						R.id.file_ico, R.id.file_name, R.id.file_size,
 						R.id.upload_time });
-		pullListView.setAdapter(adapter);
+		mPullListView.setAdapter(mAdapter);
 
-		currentKey.clear();
+		mCurrentKeys.clear();
 		loadFiles();
 
-		pullListView.setOnItemClickListener(new OnItemClickListener() {
+		mPullListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1,
@@ -93,26 +93,26 @@ public class MediaListFragment extends Fragment {
 				int realID = (int) id;
 				if (id == 0 && !isHome())// travel back to parent
 				{
-					currentKey.remove(currentKey.size() - 1);
+					mCurrentKeys.remove(mCurrentKeys.size() - 1);
 					loadFiles();
 					return;
 				}
-				Map<String, Object> item = datalist.get(realID);
+				Map<String, Object> item = mDatalist.get(realID);
 				String type = item.get("type").toString();
 				final String fileurl = item.get("file_url").toString();
 				final String filename=item.get("file_name").toString();
 				if (type.equals("DIR")) {
-					currentKey.add(fileurl);
+					mCurrentKeys.add(fileurl);
 					loadFiles();
 				} else if (type.equals("FILE")) {
 					Toast.makeText(thisActivity, fileurl, Toast.LENGTH_SHORT)
 							.show();
-					downFileDialog = OpenFileDialog.createDialog(getActivity(),
+					mDownFileDialog = OpenFileDialog.createDialog(getActivity(),
 							"choose a directory", new CallbackBundle() {
 
 								@Override
 								public void callback(Bundle bundle) {
-									downFileDialog.dismiss();
+									mDownFileDialog.dismiss();
 									final String path = bundle.getString("path");
 
 									new Thread() {
@@ -139,11 +139,11 @@ public class MediaListFragment extends Fragment {
 
 								}
 							}, null, true);
-					downFileDialog.show();
-					WindowManager.LayoutParams layoutParams = downFileDialog
+					mDownFileDialog.show();
+					WindowManager.LayoutParams layoutParams = mDownFileDialog
 							.getWindow().getAttributes();
 					layoutParams.height = LayoutParams.MATCH_PARENT;
-					downFileDialog.getWindow().setAttributes(layoutParams);
+					mDownFileDialog.getWindow().setAttributes(layoutParams);
 					
 					//HttpService.getInstance().doDownloadFile(fileurl, path)
 				}
@@ -151,7 +151,7 @@ public class MediaListFragment extends Fragment {
 
 		});
 		// pulltorefresh listener
-		pullListView.setonRefreshListener(new OnRefreshListener() {
+		mPullListView.setonRefreshListener(new OnRefreshListener() {
 
 			@Override
 			public void onRefresh() {
@@ -161,8 +161,8 @@ public class MediaListFragment extends Fragment {
 			}
 		});
 
-		btnUpload.setOnClickListener(new UploadOnclickListener());
-		btnMakeDir.setOnClickListener(new MakeDirOnclickListener());
+		mBtnUpload.setOnClickListener(new UploadOnclickListener());
+		mBtnMakeDir.setOnClickListener(new MakeDirOnclickListener());
 		return rootView;
 	}
 
@@ -178,7 +178,7 @@ public class MediaListFragment extends Fragment {
 		if (isHome())
 			return null;
 		String path = "";
-		for (String str : currentKey) {
+		for (String str : mCurrentKeys) {
 			path += str + "/";
 		}
 		path = path.substring(0, path.length() - 1);
@@ -188,14 +188,14 @@ public class MediaListFragment extends Fragment {
 	private void updateNavigation() {
 		String path = "Home";
 
-		for (String key : currentKey) {
+		for (String key : mCurrentKeys) {
 			path += "/" + key;
 		}
-		txtPath.setText(path);
+		mTxtPath.setText(path);
 	}
 
 	private boolean isHome() {
-		return currentKey.size() == 0;
+		return mCurrentKeys.size() == 0;
 	}
 
 	// message handler
@@ -204,16 +204,20 @@ public class MediaListFragment extends Fragment {
 		@Override
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
-			ArrayList<Map<String, Object>> data = (ArrayList<Map<String, Object>>) msg
-					.getData().getSerializable("data");
-
+			@SuppressWarnings("unchecked")
+			ArrayList<Map<String, Object>> dirs = (ArrayList<Map<String, Object>>) msg
+					.getData().getSerializable("dirs");
+			@SuppressWarnings("unchecked")
+			ArrayList<Map<String, Object>> files = (ArrayList<Map<String, Object>>) msg
+					.getData().getSerializable("files");
 			switch (msg.what) {
 			case GlobalUtil.MSG_LOAD_SUCCESS:
-				datalist.clear();
-				datalist.addAll(data);
-				adapter.notifyDataSetChanged();
-				pullListView.onRefreshComplete();
-				pullListView.setSelectionAfterHeaderView();
+				mDatalist.clear();
+				mDatalist.addAll(dirs);
+				mDatalist.addAll(files);
+				mAdapter.notifyDataSetChanged();
+				mPullListView.onRefreshComplete();
+				mPullListView.setSelectionAfterHeaderView();
 				break;
 			case GlobalUtil.MSG_CREATE_DIR_SUCCESS:
 				loadFiles();
@@ -259,8 +263,8 @@ public class MediaListFragment extends Fragment {
 					jsonObject = CouchDB.getFiles(true, true, key);
 
 					JSONArray jsonArray = jsonObject.getJSONArray("rows");
-					ArrayList<Map<String, Object>> dList = new ArrayList<Map<String, Object>>();
-
+					ArrayList<Map<String, Object>> files = new ArrayList<Map<String, Object>>();
+					ArrayList<Map<String, Object>> dirs = new ArrayList<Map<String, Object>>();
 					Map<String, Object> map = null;
 					if (!isHome()) {
 						// add .. for travel to parent
@@ -272,7 +276,7 @@ public class MediaListFragment extends Fragment {
 						map.put("upload_time", "");
 						map.put("file_url", "");
 						map.put("file_size", "---------");
-						dList.add(map);
+						dirs.add(map);
 					}
 					// add file list
 					for (int i = 0; i < jsonArray.length(); i++) {
@@ -290,15 +294,18 @@ public class MediaListFragment extends Fragment {
 						if (fileSize.equals("-")) {
 							map.put("file_size", "---------");
 							map.put("file_ico", R.drawable.folder_ico);
+							dirs.add(map);
 						} else {
 							map.put("file_size", fileSize + "B");
 							map.put("file_ico", R.drawable.file_ico);
+							files.add(map);
 						}
-						dList.add(map);
+						
 					}
 					Message message = new Message();
 					Bundle bundle = new Bundle();
-					bundle.putSerializable("data", dList);
+					bundle.putSerializable("files", files);
+					bundle.putSerializable("dirs", dirs);
 					message.setData(bundle);
 					message.what = GlobalUtil.MSG_LOAD_SUCCESS;
 					myHandler.sendMessage(message);
@@ -366,12 +373,12 @@ public class MediaListFragment extends Fragment {
 		public void onClick(View arg0) {
 			
 
-			openFileDialog = OpenFileDialog.createDialog(getActivity(),
+			mUploadFileDialog = OpenFileDialog.createDialog(getActivity(),
 					"choose a file", new CallbackBundle() {
 
 						@Override
 						public void callback(Bundle bundle) {
-							openFileDialog.dismiss();
+							mUploadFileDialog.dismiss();
 							final String path = bundle.getString("path");
 
 							new Thread() {
@@ -402,11 +409,11 @@ public class MediaListFragment extends Fragment {
 
 						}
 					}, null, false);
-			openFileDialog.show();
-			WindowManager.LayoutParams layoutParams = openFileDialog
+			mUploadFileDialog.show();
+			WindowManager.LayoutParams layoutParams = mUploadFileDialog
 					.getWindow().getAttributes();
 			layoutParams.height = LayoutParams.MATCH_PARENT;
-			openFileDialog.getWindow().setAttributes(layoutParams);
+			mUploadFileDialog.getWindow().setAttributes(layoutParams);
 		}
 	}
 }

@@ -12,7 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CouchDB {
-	private static HttpService httpService = HttpService.getInstance();
+	private static HttpService mHttpService = HttpService.getInstance();
 
 	// POST /_session
 	// params: name,password
@@ -21,13 +21,13 @@ public class CouchDB {
 		JSONObject args = new JSONObject();
 		args.put("name", username);
 		args.put("password", password);
-		JSONObject user = httpService.doPost("/_session", args);
+		JSONObject user = mHttpService.doPost("/_session", args);
 		return user;
 	}
 
 	// GET /_session
 	public static JSONObject getSession() {
-		JSONObject user = httpService.doGet("/_session");
+		JSONObject user = mHttpService.doGet("/_session");
 		return user;
 	}
 
@@ -45,7 +45,7 @@ public class CouchDB {
 		jsonKeys.put(keys);
 		args.put("keys", jsonKeys);
 
-		JSONObject resJson = httpService.doPost(url, args);
+		JSONObject resJson = mHttpService.doPost(url, args);
 		return resJson;
 	}
 
@@ -61,7 +61,7 @@ public class CouchDB {
 		args.put("type", "DIR");
 		args.put("created_at", created_at);
 
-		JSONObject resJson = httpService.doPost(url, args);
+		JSONObject resJson = mHttpService.doPost(url, args);
 		return resJson;
 	}
 
@@ -75,10 +75,10 @@ public class CouchDB {
 		if(dir!=null)
 			args.add(new BasicNameValuePair("dir", dir));
 
-		httpService.doPostForm(url, args);
+		mHttpService.doPostForm(url, args);
 		JSONObject resJson = new JSONObject();
-		String id= httpService.getHeader("X-Couch-Id");
-		String rev= httpService.getHeader("X-Couch-Update-NewRev");
+		String id= mHttpService.getHeader("X-Couch-Id");
+		String rev= mHttpService.getHeader("X-Couch-Update-NewRev");
 		resJson.put("id", id);
 		resJson.put("rev", rev);
 		return resJson;
@@ -86,7 +86,7 @@ public class CouchDB {
 	
 	public static boolean doDownloadFile(String url, String path)
 	{
-		return httpService.doDownloadFile(url, path);
+		return mHttpService.doDownloadFile(url, path);
 	}
 	// POST	/media/{id}?_attachments={name}&_rev={rev}
 	// params payload
@@ -103,7 +103,7 @@ public class CouchDB {
 		String url = "/media/"+id+"?";
 		url+="_attachments="+file.getName();
 		url+="&_rev="+rev;
-		resJson=httpService.doPostFile(url, rev, file);
+		resJson=mHttpService.doPostFile(url, rev, file);
 		return resJson;
 	}
 	
@@ -124,14 +124,14 @@ public class CouchDB {
 		args.put("roles", new JSONArray());
 		args.put("type", type);
 
-		JSONObject resJson = httpService.doPut(url, args);
+		JSONObject resJson = mHttpService.doPut(url, args);
 		return resJson;
 	}
 
 	// GET /chat/username
 	public static JSONObject getUserDoc(String username) {
 		String url = "/chat/" + username;
-		JSONObject resJson = httpService.doGet(url);
+		JSONObject resJson = mHttpService.doGet(url);
 		return resJson;
 	}
 
@@ -149,14 +149,14 @@ public class CouchDB {
 		args.put("left", new JSONArray(left));
 		args.put("type", type);
 
-		JSONObject resJson = httpService.doPut(url, args);
+		JSONObject resJson = mHttpService.doPut(url, args);
 		return resJson;
 	}
 
 	// GET /chat/motd
 	public static JSONObject getMOTD() {
 		String url = "/chat/motd";
-		JSONObject resJson = httpService.doGet(url);
+		JSONObject resJson = mHttpService.doGet(url);
 		return resJson;
 	}
 
@@ -164,7 +164,7 @@ public class CouchDB {
 	// database information
 	public static JSONObject getChatDBInfo() {
 		String url = "/chat";
-		JSONObject resJson = httpService.doGet(url);
+		JSONObject resJson = mHttpService.doGet(url);
 		return resJson;
 	}
 
@@ -178,7 +178,7 @@ public class CouchDB {
 		url += "&room=" + room;
 		url += "&feed=" + "longpoll";
 		url += "&since=" + since;
-		JSONObject resJson = httpService.doGet(url);
+		JSONObject resJson = mHttpService.doGet(url);
 		return resJson;
 	}
 
@@ -192,7 +192,7 @@ public class CouchDB {
 		url += "&include_docs=" + include_docs;
 		url += "&feed=" + "longpoll";
 		url += "&since=" + since;
-		JSONObject resJson = httpService.doGet(url);
+		JSONObject resJson = mHttpService.doGet(url);
 		return resJson;
 	}
 
@@ -207,7 +207,7 @@ public class CouchDB {
 		url += "&room=" + room;
 		url += "&feed=" + "longpoll";
 		url += "&since=" + since;
-		JSONObject resJson = httpService.doGet(url);
+		JSONObject resJson = mHttpService.doGet(url);
 		return resJson;
 	}
 
@@ -231,7 +231,7 @@ public class CouchDB {
 		url += "startkey=" + startKey;
 		url += "endkey=" + endKey;
 
-		JSONObject resJson = httpService.doGet(url);
+		JSONObject resJson = mHttpService.doGet(url);
 		return resJson;
 	}
 
@@ -240,7 +240,7 @@ public class CouchDB {
 	// post chat message
 	public static JSONObject postMessage(JSONObject msg) {
 		String url = "/chat/_design/chat/_update/chatitem";
-		JSONObject resJson = httpService.doPost(url, msg);
+		JSONObject resJson = mHttpService.doPost(url, msg);
 		return resJson;
 	}
 
