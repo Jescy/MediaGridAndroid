@@ -39,7 +39,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class HttpService {
-	private String mServerIP = "192.168.43.68";
+	private String mServerIP = "192.168.43.100";
 	private int mServerPort = 5984;
 	private String mBaseURL = "http://" + mServerIP + ":" + mServerPort;
 	private static HttpService mHttpService = null;

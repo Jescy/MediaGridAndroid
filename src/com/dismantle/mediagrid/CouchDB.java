@@ -1,6 +1,7 @@
 package com.dismantle.mediagrid;
 
 import java.io.File;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -67,49 +68,45 @@ public class CouchDB {
 
 	// POST /media/_design/media/_update/file
 	// params: type, dir
-	public static JSONObject createFileDocument(String dir) throws JSONException
-	{
+	public static JSONObject createFileDocument(String dir)
+			throws JSONException {
 		String url = "/media/_design/media/_update/file";
-		List<NameValuePair> args=new ArrayList<NameValuePair>();
+		List<NameValuePair> args = new ArrayList<NameValuePair>();
 		args.add(new BasicNameValuePair("type", "FILE"));
-		if(dir!=null)
+		if (dir != null)
 			args.add(new BasicNameValuePair("dir", dir));
 
 		mHttpService.doPostForm(url, args);
 		JSONObject resJson = new JSONObject();
-		String id= mHttpService.getHeader("X-Couch-Id");
-		String rev= mHttpService.getHeader("X-Couch-Update-NewRev");
+		String id = mHttpService.getHeader("X-Couch-Id");
+		String rev = mHttpService.getHeader("X-Couch-Update-NewRev");
 		resJson.put("id", id);
 		resJson.put("rev", rev);
 		return resJson;
 	}
-	
-	public static boolean doDownloadFile(String url, String path)
-	{
+
+	public static boolean doDownloadFile(String url, String path) {
 		return mHttpService.doDownloadFile(url, path);
 	}
-	// POST	/media/{id}?_attachments={name}&_rev={rev}
+
+	// POST /media/{id}?_attachments={name}&_rev={rev}
 	// params payload
-	public static JSONObject upload(String id,String rev,String path) throws Exception
-	{
-		JSONObject resJson=null;
-		File file= new File(path);
-		if(!file.exists())
-		{
-			resJson=new JSONObject();
+	public static JSONObject upload(String id, String rev, String path)
+			throws Exception {
+		JSONObject resJson = null;
+		File file = new File(path);
+		if (!file.exists()) {
+			resJson = new JSONObject();
 			resJson.put("error", "file not found");
 			return resJson;
 		}
-		String url = "/media/"+id+"?";
-		url+="_attachments="+file.getName();
-		url+="&_rev="+rev;
-		resJson=mHttpService.doPostFile(url, rev, file);
+		String url = "/media/" + id + "?";
+		url += "_attachments=" + file.getName();
+		url += "&_rev=" + rev;
+		resJson = mHttpService.doPostFile(url, rev, file);
 		return resJson;
 	}
-	
-	
-	
-	
+
 	// PUT /_users/org.couchdb.user:name
 	// params:_id,name,password,roles,type
 	public static JSONObject register(String name, String passowrd, String type)
@@ -170,10 +167,9 @@ public class CouchDB {
 
 	// GET /_changes
 	// for chat message
-	public static JSONObject longPollingChat(int since, int heartbeat,
-			String room) {
+	public static JSONObject longPollingChat(int since, String room) {
 		String url = "/chat/_changes?";
-		url += "heartbeat=" + heartbeat;
+		url += "heartbeat=" + GlobalUtil.HEART_BEAT_INTERVAL;
 		url += "&filter=" + "chat/chat";
 		url += "&room=" + room;
 		url += "&feed=" + "longpoll";
@@ -198,12 +194,11 @@ public class CouchDB {
 
 	// GET /_changes
 	// for user list
-	public static JSONObject longPollingUser(int since, int heartbeat,
-			String room, boolean include_docs) {
+	public static JSONObject longPollingUser(int since, String room) {
 		String url = "/chat/_changes?";
-		url += "heartbeat=" + heartbeat;
+		url += "heartbeat=" + GlobalUtil.HEART_BEAT_INTERVAL;
 		url += "&filter=" + "chat/user";
-		url += "&include_docs=" + include_docs;
+		url += "&include_docs=true";
 		url += "&room=" + room;
 		url += "&feed=" + "longpoll";
 		url += "&since=" + since;
@@ -228,8 +223,8 @@ public class CouchDB {
 		tmpArray.put(lastMsg);
 		String endKey = tmpArray.toString();
 
-		url += "startkey=" + startKey;
-		url += "endkey=" + endKey;
+		url += "startkey=" + URLEncoder.encode(startKey);
+		url += "&endkey=" + URLEncoder.encode(endKey);
 
 		JSONObject resJson = mHttpService.doGet(url);
 		return resJson;

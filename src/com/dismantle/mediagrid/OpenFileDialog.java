@@ -155,7 +155,7 @@ public class OpenFileDialog {
 		}
 
 		private int refreshFileList() {
-			// 刷新文件列表
+			// refresh file list
 			File[] files = null;
 			try {
 				files = new File(mPath).listFiles();
@@ -163,7 +163,7 @@ public class OpenFileDialog {
 				files = null;
 			}
 			if (files == null) {
-				// 访问出错
+				// access error
 				Toast.makeText(getContext(), mMsgError, Toast.LENGTH_SHORT)
 						.show();
 				return -1;
@@ -174,12 +174,12 @@ public class OpenFileDialog {
 				mList = new ArrayList<Map<String, Object>>(files.length);
 			}
 
-			// 用来先保存文件夹和文件夹的两个列表
+			// two list for folders and files
 			ArrayList<Map<String, Object>> lfolders = new ArrayList<Map<String, Object>>();
 			ArrayList<Map<String, Object>> lfiles = new ArrayList<Map<String, Object>>();
 
 			if (!this.mPath.equals(mPathRoot)) {
-				// 添加根目录 和 上一层目录
+				// add root directory, and back to parent direcotry
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("name", mPathRoot);
 				map.put("path", mPathRoot);
@@ -195,14 +195,14 @@ public class OpenFileDialog {
 
 			for (File file : files) {
 				if (file.isDirectory() && file.listFiles() != null) {
-					// 添加文件夹
+					// add folders
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("name", file.getName());
 					map.put("path", file.getPath());
 					map.put("img", getImageId(mPathFolder));
 					lfolders.add(map);
 				} else if (file.isFile()) {
-					// 添加文件
+					// add files
 					String sf = getSuffix(file.getName()).toLowerCase();
 					if (mSuffix == null
 							|| mSuffix.length() == 0
@@ -217,9 +217,9 @@ public class OpenFileDialog {
 				}
 			}
 
-			mList.addAll(lfolders); // 先添加文件夹，确保文件夹显示在上面
+			mList.addAll(lfolders); // first add folders
 			if (!mSelDirecotry)
-				mList.addAll(lfiles); // 再添加文件
+				mList.addAll(lfiles); // then add files
 
 			SimpleAdapter adapter = new SimpleAdapter(
 					getContext(),
@@ -236,18 +236,18 @@ public class OpenFileDialog {
 		public void onItemClick(AdapterView<?> parent, View v, int position,
 				long id) {
 
-			// 条目选择
+			
 			String pt = (String) mList.get(position).get("path");
 			String fn = (String) mList.get(position).get("name");
 			if (fn.equals(mPathRoot) || fn.equals(mPathParent)) {
-				// 如果是更目录或者上一层
+				// if root or parent directory
 				File fl = new File(pt);
 				String ppt = fl.getParent();
 				if (ppt != null) {
-					// 返回上一层
+					// back to parent
 					mPath = ppt;
 				} else {
-					// 返回更目录
+					// back to root
 					mPath = mPathRoot;
 				}
 			} else {
@@ -256,16 +256,16 @@ public class OpenFileDialog {
 				if (fl.isFile()) {
 					if (mSelDirecotry)
 						return;
-					// 设置回调的返回值
+					// parameters for the callback
 					Bundle bundle = new Bundle();
 					bundle.putString("path", pt);
 					bundle.putString("name", fn);
-					// 调用事先设置的回调函数
+					// call the callback
 					this.mCallback.callback(bundle);
 					return;
 				} else if (fl.isDirectory()) {
-					// 如果是文件夹
-					// 那么进入选中的文件夹
+					// if directory 
+					// go to the direcotry
 					mPath = pt;
 				}
 			}

@@ -43,13 +43,62 @@ class State {
 	}
 
 }
-
+/**
+ * key: user.doc.key,
+ * seckey: Whirlpool(ecDH($scope.user.prikey, str2bigInt(user.doc.key, 64))),
+ * messages: [],
+ * name: name
+ *
+ */
+class Member{
+	String key;
+	String seckey;
+	Vector<String> messages;
+	String name;
+	String fingerprint;
+	public Member(String key, String seckey, Vector<String> messages,
+			String name) {
+		super();
+		this.key = key;
+		this.seckey = seckey;
+		this.messages = messages;
+		this.name = name;
+	}
+	public Member() {
+		messages=new Vector<String>();
+	}
+	public String getKey() {
+		return key;
+	}
+	public void setKey(String key) {
+		this.key = key;
+	}
+	public String getSeckey() {
+		return seckey;
+	}
+	public void setSeckey(String seckey) {
+		this.seckey = seckey;
+	}
+	public Vector<String> getMessages() {
+		return messages;
+	}
+	public void setMessages(Vector<String> messages) {
+		this.messages = messages;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+}
+/**
+ * _id: "guoliang" _rev: "33-1a9bbf24873a7d4a495bf1c48017cd3f" key:
+ * "2lxQZiUZFLUS3giZ3kBKh3QOIG203eYP5LH=LHbyeAK" left: Array[3] rooms:
+ * Array[0] type: "USER" __proto__: Object
+ */
 class UserDoc {
-	/**
-	 * _id: "guoliang" _rev: "33-1a9bbf24873a7d4a495bf1c48017cd3f" key:
-	 * "2lxQZiUZFLUS3giZ3kBKh3QOIG203eYP5LH=LHbyeAK" left: Array[3] rooms:
-	 * Array[0] type: "USER" __proto__: Object
-	 */
 	String _id;
 	String _rev;
 	String key;

@@ -167,43 +167,41 @@ public class RTPullListView extends ListView implements OnScrollListener {
 
 				if (mState != REFRESHING && mIsRecored && mState != LOADING) {
 
-					// 保证在设置padding的过程中，当前的位置一直是在head，否则如果当列表超出屏幕的话，当在上推的时候，列表会同时进行滚动
-
-					// 可以松手去刷新了
+					// release to refresh
 					if (mState == RELEASE_To_REFRESH) {
 
 						setSelection(0);
 
-						// 往上推了，推到了屏幕足够掩盖head的程度，但是还没有推到全部掩盖的地步
+						// push to have seen the head, but not all of it
 						if (((tempY - mStartY) / RATIO < mHeadContentHeight)
 								&& (tempY - mStartY) > 0) {
 							mState = PULL_To_REFRESH;
 							changeHeaderViewByState();
 
 						}
-						// 一下子推到顶了
+						// push to top
 						else if (tempY - mStartY <= 0) {
 							mState = DONE;
 							changeHeaderViewByState();
 
 						}
-						// 往下拉了，或者还没有上推到屏幕顶部掩盖head的地步
+						
 						else {
-							// 不用进行特别的操作，只用更新paddingTop的值就行了
+
 						}
 					}
-					// 还没有到达显示松开刷新的时候,DONE或者是PULL_To_REFRESH状态
+					// not enough to show "Release to refresh"
 					if (mState == PULL_To_REFRESH) {
 
 						setSelection(0);
 
-						// 下拉到可以进入RELEASE_TO_REFRESH的状态
+						//  enough to show RELEASE_TO_REFRESH
 						if ((tempY - mStartY) / RATIO >= mHeadContentHeight) {
 							mState = RELEASE_To_REFRESH;
 							mIsBack = true;
 							changeHeaderViewByState();
 						}
-						// 上推到顶了
+						// to the top
 						else if (tempY - mStartY <= 0) {
 							mState = DONE;
 							changeHeaderViewByState();
@@ -211,7 +209,7 @@ public class RTPullListView extends ListView implements OnScrollListener {
 						}
 					}
 
-					// done状态下
+					// done
 					if (mState == DONE) {
 						if (tempY - mStartY > 0) {
 							mState = PULL_To_REFRESH;
@@ -219,14 +217,14 @@ public class RTPullListView extends ListView implements OnScrollListener {
 						}
 					}
 
-					// 更新headView的size
+					// update headView's size
 					if (mState == PULL_To_REFRESH) {
 						mHeadView.setPadding(0, -1 * mHeadContentHeight
 								+ (tempY - mStartY) / RATIO, 0, 0);
 
 					}
 
-					// 更新headView的paddingTop
+					// update headView'spaddingTop
 					if (mState == RELEASE_To_REFRESH) {
 						mHeadView.setPadding(0, (tempY - mStartY) / RATIO
 								- mHeadContentHeight, 0, 0);
@@ -241,7 +239,7 @@ public class RTPullListView extends ListView implements OnScrollListener {
 		return super.onTouchEvent(event);
 	}
 
-	// 当状态改变时候，调用该方法，以更新界面
+	//called to change the interface when state changes
 	private void changeHeaderViewByState() {
 		switch (mState) {
 		case RELEASE_To_REFRESH:
@@ -261,7 +259,7 @@ public class RTPullListView extends ListView implements OnScrollListener {
 			mTVlastUpdated.setVisibility(View.VISIBLE);
 			mImageViewArrow.clearAnimation();
 			mImageViewArrow.setVisibility(View.VISIBLE);
-			// 是由RELEASE_To_REFRESH状态转变来的
+			// from RELEASE_To_REFRESH
 			if (mIsBack) {
 				mIsBack = false;
 				mImageViewArrow.clearAnimation();

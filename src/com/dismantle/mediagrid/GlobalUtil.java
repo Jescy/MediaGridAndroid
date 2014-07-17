@@ -34,11 +34,19 @@ public class GlobalUtil {
 	public static final int MSG_DOWNLOAD_FAILED = 8;
 	public static final int MSG_LOGIN_SUCCESS = 9;
 	public static final int MSG_LOGIN_FAILED = 10;
+	public static final int MSG_SAVE_USER_DOC_SUCCESS = 11;
+	public static final int MSG_SAVE_USER_DOC_FAILED = 12;
+	public static final int MSG_GET_DB_INFO_SUCCESS = 13;
+	public static final int MSG_GET_DB_INFO_FAILED = 14;
+	public static final int MSG_POLLING_USER = 15;
+	public static final int MSG_POLLING_CHAT = 16;
+	public static final int MSG_POLLING_IM = 17;
 	
 	public static final String source_code="source_code";
 	public static final String data="data";
 	public static final String op_code="op_code";
 	
+	public static final int HEART_BEAT_INTERVAL = 1000;
 	//private static final int SOURCE_SQURE=2;
 	public static String HexEncode(byte[] toencode) {
 		StringBuilder sb = new StringBuilder(toencode.length * 2);
@@ -79,5 +87,13 @@ public class GlobalUtil {
 	public static String genRandomPassword()
 	{
 		return "123456789";
+	}
+	public static String genSecKey()
+	{
+		return "1234567890";
+	}
+	public static String genFingerPrint()
+	{
+		return "1234567890";
 	}
 }
