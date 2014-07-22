@@ -34,7 +34,7 @@
     <string name="testuserA">John</string>
     <string name="testuserB">Jescy</string>
     <string name="testuserC">Liang</string>
-    <string name="all">All</string>
+    <string name="everyone">to: Everyone</string>
     <string name="hello">How are you, John?</string>
     <string name="path">Home>>Documents</string>
     <!-- send message -->
@@ -55,4 +55,6 @@
     <string name="load_failed">Load files failed.</string>
     <string name="download_success">download files success.</string>
     <string name="download_failed">download files failed.</string>
+    
+    <string name="empty"></string>
 </resources>

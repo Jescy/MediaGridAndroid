@@ -1,10 +1,12 @@
 package com.dismantle.mediagrid;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Vector;
 
 import org.json.JSONArray;
@@ -20,6 +22,7 @@ import android.os.Message;
 import android.provider.Settings.Global;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,6 +30,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SimpleAdapter;
 
 import com.dismantle.mediagrid.RTPullListView.OnRefreshListener;
@@ -50,7 +54,18 @@ public class ChatListFragment extends Fragment {
 
 	private boolean mIsUserInitialized = false;
 	private Vector<String> mMSGs = new Vector<String>();
+	private Vector<JSONObject> mMsgQueue = new Vector<JSONObject>();
 
+	private Button mBtnSend = null;
+	private Button mBtnReceiver = null;
+	private EditText mTextMsg = null;
+
+	private String mStrReceiver = null;
+
+	private Thread mChatThread = null;
+	private Thread mIMThread = null;
+	private Thread mUserThread = null;
+	private  UserDoc mUserDoc=null;
 	public ChatListFragment() {
 
 	}
@@ -64,22 +79,22 @@ public class ChatListFragment extends Fragment {
 			JSONObject userJsonObject = new JSONObject(
 					bundle.getString("userDoc"));
 			Gson gson = new Gson();
-			final UserDoc userDoc = gson.fromJson(userJsonObject.toString(),
+			mUserDoc = gson.fromJson(userJsonObject.toString(),
 					UserDoc.class);
 			mUser.pubkey = GlobalUtil.genPublicKey();
 			mUser.prikey = GlobalUtil.genPrivateKey();
 			mUser.password = GlobalUtil.genRandomPassword();
 			mUser.room = "General";
-			mUser.username = userDoc._id;
+			mUser.username = mUserDoc._id;
 
-			if (!userDoc.rooms.contains(mUser.room)) {
-				userDoc.rooms.add(mUser.room);
+			if (!mUserDoc.rooms.contains(mUser.room)) {
+				mUserDoc.rooms.add(mUser.room);
 			}
-			if (userDoc.left.contains(mUser.room))
-				userDoc.left.remove(userDoc.left.indexOf(mUser.room));
-			userDoc.key = mUser.pubkey;
+			if (mUserDoc.left.contains(mUser.room))
+				mUserDoc.left.remove(mUserDoc.left.indexOf(mUser.room));
+			mUserDoc.key = mUser.pubkey;
 
-			saveUserDoc(userDoc);
+			saveUserDoc(mUserDoc);
 
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -90,7 +105,7 @@ public class ChatListFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		final FragmentActivity thisActivity = getActivity();
-		View rootView = inflater.inflate(R.layout.chat_list, container, false);
+		View rootView = inflater.inflate(R.layout.chat_main, container, false);
 
 		initUser();
 
@@ -117,30 +132,69 @@ public class ChatListFragment extends Fragment {
 			}
 
 		});
-		// ÏÂÀ­Ë¢ÐÂ¼àÌýÆ÷
-		mPullListView.setonRefreshListener(new OnRefreshListener() {
-
-			@Override
-			public void onRefresh() {
-
-				loadData(GlobalUtil.MSG_LOAD_SUCCESS, false);
-
-			}
-		});
 
 		// choose member button
-		Button chooseButton = (Button) rootView
-				.findViewById(R.id.btn_choose_from);
-		chooseButton.setOnClickListener(new OnClickListener() {
+		mBtnReceiver = (Button) rootView.findViewById(R.id.btn_receiver);
+		mBtnReceiver.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
 				Intent intent = new Intent(thisActivity,
 						ChooseMemberActivity.class);
-				startActivity(intent);
+				intent.putExtra("member", mUsers);
+				startActivityForResult(intent, 1);
+			}
+		});
+		mTextMsg = (EditText) rootView.findViewById(R.id.txt_msg);
+		mBtnSend = (Button) rootView.findViewById(R.id.btn_send);
+		mBtnSend.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				String plaintext = mTextMsg.getText().toString();
+				if (mStrReceiver == null || mStrReceiver.equals("Everyone")) {
+					queueMessage(plaintext, mUsers, mUser.username, mUser.room,
+							false);
+				} else {
+					/*
+					 * recipients[$scope.user.username] =
+					 * $scope.users[$scope.user.username];
+					 * recipients[$scope.chat.selected] =
+					 * $scope.users[$scope.chat.selected];
+					 * queueMsg($scope.chat.msg
+					 * ,recipients,$scope.user.username);
+					 */
+					HashMap<String, Member> recipients = new HashMap<String, Member>();
+					recipients.put(mUser.username, mUsers.get(mUser.username));
+					recipients.put(mStrReceiver, mUsers.get(mStrReceiver));
+					queueMessage(plaintext, recipients, mUser.username, null,
+							false);
+				}
+
+				mTextMsg.setText("");
 			}
 		});
 		return rootView;
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode != Activity.RESULT_OK)
+			return;
+		if (data == null)
+			return;
+		switch (requestCode) {
+		case 1:
+			Bundle bundle = data.getExtras();
+			String name = bundle.getString("name");
+			mBtnReceiver.setText("to: " + name);
+			mStrReceiver = name;
+			break;
+
+		default:
+			break;
+		}
+
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	// message handler
@@ -149,6 +203,7 @@ public class ChatListFragment extends Fragment {
 		@Override
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
+			JSONObject jsonObject = null;
 			switch (msg.what) {
 			case GlobalUtil.MSG_SAVE_USER_DOC_SUCCESS:
 				getSequenceNumber();
@@ -157,6 +212,7 @@ public class ChatListFragment extends Fragment {
 				mUpdateSeq = Integer.valueOf(msg.obj.toString());
 				longPollingUser(0);
 				longPollingChat(mUpdateSeq);
+				longPollingIM(mUpdateSeq);
 				break;
 			case GlobalUtil.MSG_POLLING_USER:
 				updateUsers((JSONObject) msg.obj);
@@ -164,20 +220,32 @@ public class ChatListFragment extends Fragment {
 
 				break;
 			case GlobalUtil.MSG_POLLING_CHAT:
-				JSONObject jsonObject = (JSONObject) msg.obj;
+				jsonObject = (JSONObject) msg.obj;
 				try {
 					mUpdateSeq = jsonObject.getInt("last_seq");
 				} catch (JSONException e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 				getMessages(jsonObject);
 				break;
+			case GlobalUtil.MSG_POLLING_IM:
+				jsonObject = (JSONObject) msg.obj;
+				try {
+					mUpdateSeq = jsonObject.getInt("last_seq");
+					showInstantMessages(jsonObject);
+				} catch (JSONException e) {
+					e.printStackTrace(System.err);
+				}
+				longPollingIM(mUpdateSeq);
+				break;
 			case GlobalUtil.MSG_CHAT_LIST:
-				List<Map<String, Object>> msgs=(List<Map<String,Object>>)msg.obj;
+				@SuppressWarnings("unchecked")
+				List<Map<String, Object>> msgs = (List<Map<String, Object>>) msg.obj;
 				mDatalist.addAll(msgs);
 				mAdapter.notifyDataSetChanged();
 				mPullListView.setSelection(mPullListView.getBottom());
 				longPollingChat(mUpdateSeq);
+
 				break;
 			default:
 				break;
@@ -272,7 +340,7 @@ public class ChatListFragment extends Fragment {
 	}
 
 	private void longPollingUser(final int seq) {
-		new Thread() {
+		mUserThread = new Thread() {
 
 			@Override
 			public void run() {
@@ -284,15 +352,15 @@ public class ChatListFragment extends Fragment {
 				myHandler.sendMessage(msg);
 			}
 
-		}.start();
+		};
+		mUserThread.start();
 	}
 
 	private void longPollingChat(final int seq) {
-		new Thread() {
+		mChatThread = new Thread() {
 
 			@Override
 			public void run() {
-
 				JSONObject resJson = CouchDB.longPollingChat(seq, mUser.room);
 				Message msg = new Message();
 				msg.what = GlobalUtil.MSG_POLLING_CHAT;
@@ -300,7 +368,23 @@ public class ChatListFragment extends Fragment {
 				myHandler.sendMessage(msg);
 			}
 
-		}.start();
+		};
+		mChatThread.start();
+	}
+
+	private void longPollingIM(final int seq) {
+		mIMThread = new Thread() {
+			@Override
+			public void run() {
+				JSONObject resJson = CouchDB.longPollingIM(seq);
+				Message msg = new Message();
+				msg.what = GlobalUtil.MSG_POLLING_IM;
+				msg.obj = resJson;
+				myHandler.sendMessage(msg);
+			}
+
+		};
+		mIMThread.start();
 	}
 
 	private void updateUsers(JSONObject jsonUsers) {
@@ -317,7 +401,7 @@ public class ChatListFragment extends Fragment {
 					if (mUsers.containsKey(id))
 						mUsers.remove(id);
 					if (mIsUserInitialized)
-						mMSGs.add("*" + id + "has left.");
+						mMSGs.add("*" + id + " has left.");
 
 				} else if (!userDoc.left.contains(mUser.room)
 						&& userDoc.rooms.contains(mUser.room)) {
@@ -328,7 +412,7 @@ public class ChatListFragment extends Fragment {
 						member.name = id;
 						mUsers.put(id, member);
 						if (mIsUserInitialized || id == mUser.username)
-							mMSGs.add("*" + id + "has arrived.");
+							mMSGs.add("*" + id + " has arrived.");
 					}
 					mUsers.get(id).fingerprint = GlobalUtil.genFingerPrint();
 
@@ -340,7 +424,53 @@ public class ChatListFragment extends Fragment {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		printMSG();
+	}
 
+	private void printMSG() {
+		ArrayList<Map<String, Object>> msgs = new ArrayList<Map<String, Object>>();
+		for (String msg : mMSGs) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("chat_from", "message");
+			map.put("chat_to", "every one");
+			map.put("chat_time", new Date().toLocaleString());
+			map.put("chat_msg", msg);
+			msgs.add(map);
+		}
+		mDatalist.addAll(msgs);
+		mAdapter.notifyDataSetChanged();
+		mPullListView.setSelection(mPullListView.getBottom());
+		mMSGs.clear();
+	}
+
+	private void showInstantMessages(JSONObject jsonObject)
+			throws JSONException {
+		JSONArray rows = jsonObject.getJSONArray("results");
+
+		ArrayList<Map<String, Object>> msgs = new ArrayList<Map<String, Object>>();
+		for (int i = 0; i < rows.length(); i++) {
+			JSONObject row = rows.getJSONObject(i);
+			JSONObject doc = row.getJSONObject("doc");
+			JSONObject message = doc.getJSONObject("message");
+			JSONObject to = message.getJSONObject(mUser.username);
+
+			// deal with each message
+			String chat_from = doc.getString("from");
+			String chat_to = doc.getString("to");
+			String chat_time = new java.util.Date(doc.getLong("created_at"))
+					.toLocaleString();
+			String chat_msg = to.getString("msg");
+
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("chat_from", chat_from);
+			map.put("chat_to", chat_to);
+			map.put("chat_time", chat_time);
+			map.put("chat_msg", chat_msg);
+			msgs.add(map);
+		}
+		mDatalist.addAll(msgs);
+		mAdapter.notifyDataSetChanged();
+		mPullListView.setSelection(mPullListView.getBottom());
 	}
 
 	private void getMessages(final JSONObject jsonMessages) {
@@ -356,27 +486,22 @@ public class ChatListFragment extends Fragment {
 					String firstMsg = results.getJSONObject(0).getString("id");
 					JSONObject resJson = CouchDB.getMsgs(mUser.room,
 							mUser.username, firstMsg, lastMsg);
-					JSONArray rows=resJson.getJSONArray("rows");
-					
-					ArrayList<Map<String, Object>> msgs=new ArrayList<Map<String,Object>>();
-					for(int i=0;i<rows.length();i++)
-					{
-						JSONObject jsonObject=rows.getJSONObject(i);
+					JSONArray rows = resJson.getJSONArray("rows");
+
+					ArrayList<Map<String, Object>> msgs = new ArrayList<Map<String, Object>>();
+					for (int i = 0; i < rows.length(); i++) {
+						JSONObject jsonObject = rows.getJSONObject(i);
 						JSONObject value = jsonObject.getJSONObject("value");
-						JSONObject message= value.getJSONObject("message");
-						JSONObject to= message.getJSONObject(mUser.username);
-//						JSONObject jsonMSG = jsonArray.getJSONObject(i);
-//						Map<String, Object> map = new HashMap<String, Object>();
-//						map.put("chat_from", jsonMSG.get("chat_from"));
-//						map.put("chat_to", jsonMSG.get("chat_to"));
-//						map.put("chat_time", jsonMSG.get("chat_time"));
-//						map.put("chat_msg", jsonMSG.get("chat_msg"));
-						//deal with each message
+						JSONObject message = value.getJSONObject("message");
+						JSONObject to = message.getJSONObject(mUser.username);
+
+						// deal with each message
 						String chat_from = value.getString("nick");
 						String chat_to = mUser.username;
-						String chat_time = String.valueOf(value.getLong("created_at"));
+						String chat_time = new java.util.Date(
+								value.getLong("created_at")).toLocaleString();
 						String chat_msg = to.getString("msg");
-						
+
 						Map<String, Object> map = new HashMap<String, Object>();
 						map.put("chat_from", chat_from);
 						map.put("chat_to", chat_to);
@@ -384,7 +509,7 @@ public class ChatListFragment extends Fragment {
 						map.put("chat_msg", chat_msg);
 						msgs.add(map);
 					}
-					Message msg=new Message();
+					Message msg = new Message();
 					msg.what = GlobalUtil.MSG_CHAT_LIST;
 					msg.obj = msgs;
 					myHandler.sendMessage(msg);
@@ -395,5 +520,96 @@ public class ChatListFragment extends Fragment {
 
 		}.start();
 
+	}
+
+	private void postQueue() {
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+
+					while (!mMsgQueue.isEmpty()) {
+						CouchDB.postMsg(mMsgQueue.elementAt(0));
+						mMsgQueue.remove(0);
+					}
+
+				} catch (Exception e) {
+					e.printStackTrace(System.err);
+				}
+			}
+
+		}.start();
+	}
+
+	public void queueMessage(String plaintext,
+			HashMap<String, Member> recipients, String username, String room,
+			boolean priority) {
+		final JSONObject doc = new JSONObject();
+		JSONObject msg = new JSONObject();
+		String to = username;
+		for (String name : recipients.keySet()) {
+			if (room == null && name != username) {
+				to = name;
+			}
+			/*
+			 * var crypt = Crypto.AES.encrypt(plaintext, Crypto
+			 * .util.hexToBytes(user.seckey.substring(0, 64)), { mode: new
+			 * Crypto.mode.CBC(Crypto.pad.iso10126) });
+			 */
+			String crypt = plaintext;
+			String hmac = "";// Crypto.HMAC(Whirlpool, crypt,
+								// user.seckey.substring(64, 128))
+
+			JSONObject userMsg = new JSONObject();
+			try {
+				userMsg.put("msg", crypt);
+				userMsg.put("hmac", hmac);
+				msg.put(name, userMsg);
+			} catch (JSONException e) {
+				e.printStackTrace(System.err);
+			}
+
+		}
+		try {
+			if (room == null) {
+				doc.put("type", "IM");
+				doc.put("from", username);
+				doc.put("to", to);
+				doc.put("message", msg);
+			} else {
+				doc.put("type", "MSG");
+				doc.put("room", room);
+				doc.put("nick", username);
+				doc.put("message", msg);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace(System.err);
+		}
+
+		if (priority) {
+			new Thread() {
+
+				@Override
+				public void run() {
+					CouchDB.postMsg(doc);
+				}
+
+			}.start();
+
+		} else {
+			mMsgQueue.add(doc);
+			postQueue();
+		}
+	}
+
+	public void switchRoom() {
+//		mMsgQueue.clear();
+//		mMSGs.clear();
+//		mDatalist.clear();
+//		mChatThread.stop();
+//		mIMThread.stop();
+//		mUserThread.stop();
+//		mUser.room="kkk";
+//		saveUserDoc(mUserDoc);
 	}
 }

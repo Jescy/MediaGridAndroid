@@ -65,7 +65,7 @@ public class MediaListFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		final FragmentActivity thisActivity = getActivity();
-		View rootView = inflater.inflate(R.layout.media_list, container, false);
+		View rootView = inflater.inflate(R.layout.media_main, container, false);
 		mPullListView = (RTPullListView) rootView.findViewById(R.id.file_list);
 		mTxtPath = (TextView) rootView.findViewById(R.id.txt_path);
 		mBtnMakeDir = (Button) rootView.findViewById(R.id.btn_mkdir);

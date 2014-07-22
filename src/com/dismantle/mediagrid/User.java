@@ -1,5 +1,6 @@
 package com.dismantle.mediagrid;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 class State {
@@ -50,7 +51,8 @@ class State {
  * name: name
  *
  */
-class Member{
+class Member implements Serializable{
+	private static final long serialVersionUID = 3614346967078129236L;
 	String key;
 	String seckey;
 	Vector<String> messages;

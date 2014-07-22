@@ -174,21 +174,21 @@ public class CouchDB {
 		url += "&room=" + room;
 		url += "&feed=" + "longpoll";
 		url += "&since=" + since;
-		JSONObject resJson = mHttpService.doGet(url);
+		JSONObject resJson = mHttpService.doGetPolling(url);
 		return resJson;
 	}
 
 	// GET /_changes
 	// for IM message
-	public static JSONObject longPollingIM(int since, int heartbeat,
-			boolean include_docs) {
+	//http://127.0.0.1:5984/chat/_changes?heartbeat=10000&filter=chat%2Fim&include_docs=true&feed=longpoll&since=407
+	public static JSONObject longPollingIM(int since) {
 		String url = "/chat/_changes?";
-		url += "heartbeat=" + heartbeat;
+		url += "heartbeat=" + GlobalUtil.HEART_BEAT_INTERVAL;
 		url += "&filter=" + "chat/im";
-		url += "&include_docs=" + include_docs;
+		url += "&include_docs=true";
 		url += "&feed=" + "longpoll";
 		url += "&since=" + since;
-		JSONObject resJson = mHttpService.doGet(url);
+		JSONObject resJson = mHttpService.doGetPolling(url);
 		return resJson;
 	}
 
@@ -202,7 +202,7 @@ public class CouchDB {
 		url += "&room=" + room;
 		url += "&feed=" + "longpoll";
 		url += "&since=" + since;
-		JSONObject resJson = mHttpService.doGet(url);
+		JSONObject resJson = mHttpService.doGetPolling(url);
 		return resJson;
 	}
 
@@ -233,53 +233,10 @@ public class CouchDB {
 	// POST /chat/_design/chat/_update/chatitem
 	// params:
 	// post chat message
-	public static JSONObject postMessage(JSONObject msg) {
+	public static JSONObject postMsg(JSONObject msg) {
 		String url = "/chat/_design/chat/_update/chatitem";
-		JSONObject resJson = mHttpService.doPost(url, msg);
+		JSONObject resJson = mHttpService.doPostForm(url, msg.toString());
 		return resJson;
-	}
-
-	public static void queueMessage(String plaintext,
-			Vector<JSONObject> recipients, String username, String room,
-			boolean priority) throws JSONException {
-		JSONObject doc = new JSONObject();
-		JSONObject msg = new JSONObject();
-		String to = username;
-		for (JSONObject user : recipients) {
-			String name = user.getString("name");
-			if (room == null && name != username) {
-				to = name;
-			}
-			/*
-			 * var crypt = Crypto.AES.encrypt(plaintext, Crypto
-			 * .util.hexToBytes(user.seckey.substring(0, 64)), { mode: new
-			 * Crypto.mode.CBC(Crypto.pad.iso10126) });
-			 */
-			String crypt = plaintext;
-			String hmac = "";// Crypto.HMAC(Whirlpool, crypt,
-								// user.seckey.substring(64, 128))
-
-			JSONObject userMsg = new JSONObject();
-			userMsg.put("msg", crypt);
-			userMsg.put("hmac", hmac);
-			msg.put(name, userMsg);
-		}
-		if (room == null) {
-			doc.put("type", "IM");
-			doc.put("from", username);
-			doc.put("to", to);
-			doc.put("message", msg);
-		} else {
-			doc.put("type", "MSG");
-			doc.put("room", room);
-			doc.put("nick", username);
-			doc.put("message", msg);
-		}
-		if (priority) {
-			postMessage(doc);
-		} else {
-			postMessage(doc);
-		}
 	}
 
 	public static JSONArray getFileList() throws Exception {

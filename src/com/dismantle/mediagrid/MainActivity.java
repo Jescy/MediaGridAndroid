@@ -35,6 +35,7 @@ public class MainActivity extends ActionBarActivity implements
 	 */
 	ViewPager mViewPager;
 
+	private ChatListFragment mChatListFragment=null;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -90,7 +91,9 @@ public class MainActivity extends ActionBarActivity implements
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
+		if (id == R.id.switch_room) {
+//			mChatListFragment
+			mChatListFragment.switchRoom();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -132,8 +135,8 @@ public class MainActivity extends ActionBarActivity implements
 			switch(position)
 			{
 			case 0:
-				return new ChatListFragment();
-				
+				mChatListFragment = new ChatListFragment();
+				return mChatListFragment;
 			case 1:
 				return new MediaListFragment();
 				

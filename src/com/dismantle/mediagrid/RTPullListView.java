@@ -123,6 +123,7 @@ public class RTPullListView extends ListView implements OnScrollListener {
 	public void onScrollStateChanged(AbsListView arg0, int arg1) {
 		
 	}
+	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 

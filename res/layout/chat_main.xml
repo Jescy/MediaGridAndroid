@@ -21,43 +21,32 @@
             android:layout_width="fill_parent"
             android:layout_height="1dp"
             android:layout_alignParentTop="true"
-            android:background="#A3A3A3" />
+            android:background="#A3A3A3"
+            android:contentDescription="@string/empty" />
 
         <EditText
-            android:id="@+id/txtMsg"
+            android:id="@+id/txt_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@+id/btn_send"
-            android:layout_toRightOf="@+id/btn_choose_from"
             android:background="@drawable/chat_input_bg"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="20dp"
             android:hint="@string/hint_input_msg" />
 
         <Button
             android:id="@+id/btn_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/txtMsg"
+            android:layout_alignBottom="@+id/txt_msg"
             android:layout_alignParentRight="true"
-            android:layout_alignTop="@+id/txtMsg"
+            android:layout_alignTop="@+id/txt_msg"
             android:layout_centerVertical="true"
             android:layout_marginLeft="3dp"
             android:layout_marginRight="3dp"
             android:background="@drawable/button_send_bg"
             android:text="@string/send_msg" />
-
-        <Button
-            android:id="@+id/btn_choose_from"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/txtMsg"
-            android:layout_alignParentLeft="true"
-            android:layout_alignTop="@+id/txtMsg"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="3dp"
-            android:layout_marginRight="3dp"
-            android:background="@drawable/button_send_bg"
-            android:text="@string/all" />
     </RelativeLayout>
 
     <com.dismantle.mediagrid.RTPullListView
@@ -71,5 +60,17 @@
         android:dividerHeight="20dp"
         android:scrollbars="none" >
     </com.dismantle.mediagrid.RTPullListView>
+
+    <Button
+        android:id="@+id/btn_receiver"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:background="@drawable/button_receiver_bg"
+        android:text="@string/everyone"
+        android:textSize="15sp" />
 
 </RelativeLayout>

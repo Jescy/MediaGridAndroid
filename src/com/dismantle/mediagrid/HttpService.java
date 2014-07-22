@@ -7,16 +7,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
+import java.net.URLEncoder;
 import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -44,23 +44,32 @@ public class HttpService {
 	private String mBaseURL = "http://" + mServerIP + ":" + mServerPort;
 	private static HttpService mHttpService = null;
 	private DefaultHttpClient mHttpClient = null;
+	private DefaultHttpClient mPollingChatClient = null;
+	private DefaultHttpClient mPollingIMClient = null;
+	private DefaultHttpClient mPollingUserClient = null;
 	private HttpResponse mHttpResponse = null;
 
 	private HttpService() {
+		mHttpClient = createHttpClient();
+		// mPollingChatClient = createHttpClient();
+		// mPollingIMClient = createHttpClient();
+		// mPollingUserClient = createHttpClient();
+	}
+
+	private DefaultHttpClient createHttpClient() {
 		HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 		HttpProtocolParams.setContentCharset(params, "UTF-8");
 		HttpProtocolParams.setUseExpectContinue(params, true);
-		ConnManagerParams.setTimeout(params, 1000);
-		HttpConnectionParams.setConnectionTimeout(params, 2000);
-		HttpConnectionParams.setSoTimeout(params, 4000);
+		ConnManagerParams.setTimeout(params, 20000);
+		HttpConnectionParams.setConnectionTimeout(params, 20000);
+		HttpConnectionParams.setSoTimeout(params, 40000);
 		SchemeRegistry schReg = new SchemeRegistry();
 		schReg.register(new Scheme("http", PlainSocketFactory
-				.getSocketFactory(), 80));
+				.getSocketFactory(), 5984));
 		ClientConnectionManager conMgr = new ThreadSafeClientConnManager(
 				params, schReg);
-		mHttpClient = new DefaultHttpClient(conMgr, params);
-
+		return new DefaultHttpClient(conMgr, params);
 	}
 
 	public static HttpService getInstance() {
@@ -90,11 +99,38 @@ public class HttpService {
 		JSONObject jsonObject = null;
 		try {
 			mHttpResponse = mHttpClient.execute(httpGet);// execute get
-			String resultString = EntityUtils
-					.toString(mHttpResponse.getEntity());
+			String resultString = EntityUtils.toString(mHttpResponse
+					.getEntity());
 			jsonObject = new JSONObject(resultString);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
+		}
+		return jsonObject;
+	}
+
+	public JSONObject doGetPolling(String url) {
+
+		DefaultHttpClient client = createHttpClient();
+		client.setCookieStore(mHttpClient.getCookieStore());
+		HttpGet httpGet = new HttpGet(mBaseURL + url);
+		httpGet.setHeader("Content-Type", "application/json");
+		httpGet.setHeader("Accept", "application/json");
+		JSONObject jsonObject = null;
+		while (true) {
+			try {
+				mHttpResponse = client.execute(httpGet);// execute get
+				String resultString = EntityUtils.toString(mHttpResponse
+						.getEntity());
+				jsonObject = new JSONObject(resultString);
+				break;
+			} catch (Exception e) {
+				e.printStackTrace(System.err);
+				try {
+					Thread.sleep(GlobalUtil.RECONNECT_INTERVAL);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+			}
 		}
 		return jsonObject;
 	}
@@ -107,8 +143,9 @@ public class HttpService {
 			httppost.setEntity(new StringEntity(args.toString(), "UTF-8")); // execute
 																			// post
 			mHttpResponse = mHttpClient.execute(httppost);
-			String resultString = EntityUtils
-					.toString(mHttpResponse.getEntity());
+
+			String resultString = EntityUtils.toString(mHttpResponse
+					.getEntity());
 			jsonObject = new JSONObject(resultString);
 		} catch (JSONException e) {
 			return null;
@@ -129,8 +166,29 @@ public class HttpService {
 			httppost.setEntity(new UrlEncodedFormEntity(args, "UTF-8")); // execute
 			// post
 			mHttpResponse = mHttpClient.execute(httppost);
-			String resultString = EntityUtils
-					.toString(mHttpResponse.getEntity());
+			String resultString = EntityUtils.toString(mHttpResponse
+					.getEntity());
+			jsonObject = new JSONObject(resultString);
+		} catch (JSONException e) {
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+		return jsonObject;
+	}
+
+	public JSONObject doPostForm(String url, String payload) {
+		HttpPost httppost = new HttpPost(mBaseURL + url);
+		JSONObject jsonObject = null;
+		try {
+			httppost.setHeader("Content-Type",
+					"application/x-www-form-urlencoded; charset=UTF-8");
+			httppost.setEntity(new StringEntity(URLEncoder.encode(payload,
+					"UTF-8"))); // execute
+			// post
+			mHttpResponse = mHttpClient.execute(httppost);
+			String resultString = EntityUtils.toString(mHttpResponse
+					.getEntity());
 			jsonObject = new JSONObject(resultString);
 		} catch (JSONException e) {
 			return null;
@@ -148,8 +206,8 @@ public class HttpService {
 			httpput.setEntity(new StringEntity(args.toString(), "UTF-8")); // execute
 																			// post
 			mHttpResponse = mHttpClient.execute(httpput);
-			String resultString = EntityUtils
-					.toString(mHttpResponse.getEntity());
+			String resultString = EntityUtils.toString(mHttpResponse
+					.getEntity());
 			jsonObject = new JSONObject(resultString);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
@@ -214,8 +272,8 @@ public class HttpService {
 					+ "/media/_design/media/files.html");
 			httpPost.setEntity(arrayEntity);
 			mHttpResponse = mHttpClient.execute(httpPost);
-			String resultString = EntityUtils
-					.toString(mHttpResponse.getEntity());
+			String resultString = EntityUtils.toString(mHttpResponse
+					.getEntity());
 			jsonObject = new JSONObject(resultString);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
@@ -223,12 +281,11 @@ public class HttpService {
 		return jsonObject;
 	}
 
-	public boolean doDownloadFile(String url, String path)  {
+	public boolean doDownloadFile(String url, String path) {
 		try {
 
 			File file = new File(path);
-			if(file.exists())
-			{
+			if (file.exists()) {
 				file.delete();
 			}
 			URL urlURL = new URL(mBaseURL + url);
