@@ -52,6 +52,8 @@ public class GlobalUtil {
 	public static final String source_code = "source_code";
 	public static final String data = "data";
 	public static final String op_code = "op_code";
+	
+	public static final String every_one="Everyone";
 
 	public static final int HEART_BEAT_INTERVAL = 10000;
 	public static final int RECONNECT_INTERVAL = 20000;

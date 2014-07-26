@@ -12,6 +12,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,6 +40,7 @@ public class ChatListFragment extends Fragment {
 	private RTPullListView mPullListView = null;
 
 	List<Map<String, Object>> mDatalist = null;
+	Map<String, List<Map<String, Object>>> mDatalists = null;
 	// private List<String> dataList;
 	private SimpleAdapter mAdapter = null;
 	private User mUser = null;
@@ -108,8 +111,6 @@ public class ChatListFragment extends Fragment {
 		// setListAdapter(adapter);
 		mPullListView.setAdapter(mAdapter);
 
-		loadData(GlobalUtil.MSG_LOAD_SUCCESS, false);
-
 		mPullListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -139,7 +140,8 @@ public class ChatListFragment extends Fragment {
 			@Override
 			public void onClick(View arg0) {
 				String plaintext = mTextMsg.getText().toString();
-				if (mStrReceiver == null || mStrReceiver.equals("Everyone")) {
+				if (mStrReceiver == null
+						|| mStrReceiver.equals(GlobalUtil.every_one)) {
 					queueMessage(plaintext, mUsers, mUser.username, mUser.room,
 							false);
 				} else {
@@ -161,6 +163,8 @@ public class ChatListFragment extends Fragment {
 				mTextMsg.setText("");
 			}
 		});
+		mStrReceiver = GlobalUtil.every_one;
+		mDatalists = new HashMap<String, List<Map<String, Object>>>();
 		return rootView;
 	}
 
@@ -176,6 +180,15 @@ public class ChatListFragment extends Fragment {
 			String name = bundle.getString("name");
 			mBtnReceiver.setText("to: " + name);
 			mStrReceiver = name;
+
+			if (!mDatalists.containsKey(mStrReceiver)) {
+				mDatalists.put(mStrReceiver, new Vector<Map<String, Object>>());
+			}
+
+			mDatalist.clear();
+			mDatalist.addAll(mDatalists.get(mStrReceiver));
+			mAdapter.notifyDataSetChanged();
+			mPullListView.setSelection(mPullListView.getBottom());
 			break;
 
 		default:
@@ -232,9 +245,17 @@ public class ChatListFragment extends Fragment {
 			case GlobalUtil.MSG_CHAT_LIST:
 				@SuppressWarnings("unchecked")
 				List<Map<String, Object>> msgs = (List<Map<String, Object>>) msg.obj;
-				mDatalist.addAll(msgs);
-				mAdapter.notifyDataSetChanged();
-				mPullListView.setSelection(mPullListView.getBottom());
+				if (!mDatalists.containsKey(GlobalUtil.every_one)) {
+					mDatalists.put(GlobalUtil.every_one,
+							new Vector<Map<String, Object>>());
+				}
+				mDatalists.get(GlobalUtil.every_one).addAll(msgs);
+				if (mStrReceiver.equals(GlobalUtil.every_one)) {
+					mDatalist.clear();
+					mDatalist.addAll(mDatalists.get(mStrReceiver));
+					mAdapter.notifyDataSetChanged();
+					mPullListView.setSelection(mPullListView.getBottom());
+				}
 				longPollingChat(mUpdateSeq);
 
 				break;
@@ -290,13 +311,12 @@ public class ChatListFragment extends Fragment {
 					JSONObject resJson = CouchDB.saveUserDoc(userDoc._id,
 							userDoc._rev, userDoc.key, userDoc.type,
 							userDoc.rooms, userDoc.left);
-					if (!resJson.has("error")){
-						String rev=resJson.getString("rev");
-						mUserDoc._rev=rev;
+					if (!resJson.has("error")) {
+						String rev = resJson.getString("rev");
+						mUserDoc._rev = rev;
 						myHandler
 								.sendEmptyMessage(GlobalUtil.MSG_SAVE_USER_DOC_SUCCESS);
-					}
-					else
+					} else
 						myHandler
 								.sendEmptyMessage(GlobalUtil.MSG_SAVE_USER_DOC_FAILED);
 				} catch (JSONException e) {
@@ -422,18 +442,24 @@ public class ChatListFragment extends Fragment {
 	}
 
 	private void printMSG() {
-		ArrayList<Map<String, Object>> msgs = new ArrayList<Map<String, Object>>();
+
+		if (!mDatalists.containsKey(GlobalUtil.every_one))
+			mDatalists.put(GlobalUtil.every_one,
+					new Vector<Map<String, Object>>());
 		for (String msg : mMSGs) {
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("chat_from", "message");
 			map.put("chat_to", "every one");
 			map.put("chat_time", new Date().toGMTString());
 			map.put("chat_msg", msg);
-			msgs.add(map);
+			mDatalists.get(GlobalUtil.every_one).add(map);
 		}
-		mDatalist.addAll(msgs);
-		mAdapter.notifyDataSetChanged();
-		mPullListView.setSelection(mPullListView.getBottom());
+		if (mStrReceiver.equals(GlobalUtil.every_one)) {
+			mDatalist.clear();
+			mDatalist.addAll(mDatalists.get(GlobalUtil.every_one));
+			mAdapter.notifyDataSetChanged();
+			mPullListView.setSelection(mPullListView.getBottom());
+		}
 		mMSGs.clear();
 	}
 
@@ -441,7 +467,6 @@ public class ChatListFragment extends Fragment {
 			throws JSONException {
 		JSONArray rows = jsonObject.getJSONArray("results");
 
-		ArrayList<Map<String, Object>> msgs = new ArrayList<Map<String, Object>>();
 		for (int i = 0; i < rows.length(); i++) {
 			JSONObject row = rows.getJSONObject(i);
 			JSONObject doc = row.getJSONObject("doc");
@@ -460,11 +485,24 @@ public class ChatListFragment extends Fragment {
 			map.put("chat_to", chat_to);
 			map.put("chat_time", chat_time);
 			map.put("chat_msg", chat_msg);
-			msgs.add(map);
+
+			String msgWith = chat_from;
+			if (chat_from.equals(mUser.username))
+				msgWith = chat_to;
+			// save received message to mDatalists according to chat_from
+			if (!mDatalists.containsKey(msgWith)) {
+				mDatalists.put(msgWith, new Vector<Map<String, Object>>());
+			}
+			mDatalists.get(msgWith).add(map);
+			// if chat_from is the current receiver, then show message
+			if (msgWith.equals(mStrReceiver)) {
+				mDatalist.clear();
+				mDatalist.addAll(mDatalists.get(msgWith));
+				mAdapter.notifyDataSetChanged();
+				mPullListView.setSelection(mPullListView.getBottom());
+			}
 		}
-		mDatalist.addAll(msgs);
-		mAdapter.notifyDataSetChanged();
-		mPullListView.setSelection(mPullListView.getBottom());
+
 	}
 
 	private void getMessages(final JSONObject jsonMessages) {
@@ -597,21 +635,42 @@ public class ChatListFragment extends Fragment {
 	}
 
 	public void switchRoom() {
-		mMsgQueue.clear();
-		mMSGs.clear();
-		mDatalist.clear();
-		mChatThread.interrupt();
-		mIMThread.interrupt();
-		mUserThread.interrupt();
-		// mChatThread.stop();
-		// mIMThread.stop();
-		// mUserThread.stop();
-		mUser.room = "kkk";
-		if (!mUserDoc.rooms.contains(mUser.room)) {
-			mUserDoc.rooms.add(mUser.room);
-		}
-		if (mUserDoc.left.contains(mUser.room))
-			mUserDoc.left.remove(mUserDoc.left.indexOf(mUser.room));
-		saveUserDoc(mUserDoc);
+		final EditText txtRoom = new EditText(getActivity());
+		new AlertDialog.Builder(getActivity())
+				.setTitle("Switch room")
+				.setView(txtRoom)
+				.setPositiveButton(android.R.string.ok,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int which) {
+								String room = txtRoom.getText().toString()
+										.trim();
+								if (room.equals(""))
+									return;
+								mMsgQueue.clear();
+								mMSGs.clear();
+								mDatalist.clear();
+								mChatThread.interrupt();
+								mIMThread.interrupt();
+								mUserThread.interrupt();
+
+								mUser.room = room;
+								if (!mUserDoc.rooms.contains(mUser.room)) {
+									mUserDoc.rooms.add(mUser.room);
+								}
+								if (mUserDoc.left.contains(mUser.room))
+									mUserDoc.left.remove(mUserDoc.left
+											.indexOf(mUser.room));
+								saveUserDoc(mUserDoc);
+							}
+						})
+				.setNegativeButton(android.R.string.cancel,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int which) {
+
+							}
+						}).show();
+
 	}
 }

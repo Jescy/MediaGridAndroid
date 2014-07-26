@@ -4,7 +4,6 @@ import java.util.Vector;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -88,7 +87,6 @@ public class LoginActivity extends ActionBarActivity {
 
 					@Override
 					public void run() {
-						// TODO Auto-generated method stub
 						// String resString=HttpService.doGet("/_session");
 						JSONObject res = null;
 						try {
@@ -213,6 +211,8 @@ public class LoginActivity extends ActionBarActivity {
 			if (name == "")
 				mBtnNames[i].setVisibility(View.INVISIBLE);
 			else {
+				if(name.length()>6)
+					name=name.substring(0,6)+"*";
 				mBtnNames[i].setText(name);
 				mBtnNames[i].setVisibility(View.VISIBLE);
 			}
@@ -291,7 +291,6 @@ public class LoginActivity extends ActionBarActivity {
 								GlobalUtil.MSG_GET_SESSION_FAILED, null);
 					}
 				} catch (JSONException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 

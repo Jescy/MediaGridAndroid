@@ -39,7 +39,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class HttpService {
-	private String mServerIP = "192.168.137.1";
+	private String mServerIP = "127.0.0.1";
 	private int mServerPort = 5984;
 	private String mBaseURL = "http://" + mServerIP + ":" + mServerPort;
 	private static HttpService mHttpService = null;
@@ -210,9 +210,9 @@ public class HttpService {
 		}
 		return jsonObject;
 	}
-	public JSONObject doDelete(String url)
-	{
-		HttpDelete httpDelete = new HttpDelete(mBaseURL+url);
+
+	public JSONObject doDelete(String url) {
+		HttpDelete httpDelete = new HttpDelete(mBaseURL + url);
 		JSONObject jsonObject = null;
 		try {
 			mHttpResponse = mHttpClient.execute(httpDelete);
