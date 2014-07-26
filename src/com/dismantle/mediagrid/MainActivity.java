@@ -35,7 +35,8 @@ public class MainActivity extends ActionBarActivity implements
 	 */
 	ViewPager mViewPager;
 
-	private ChatListFragment mChatListFragment=null;
+	private ChatListFragment mChatListFragment = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -44,7 +45,7 @@ public class MainActivity extends ActionBarActivity implements
 		// Set up the action bar.
 		final ActionBar actionBar = getSupportActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-		
+
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the activity.
 		mSectionsPagerAdapter = new SectionsPagerAdapter(
@@ -91,10 +92,23 @@ public class MainActivity extends ActionBarActivity implements
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.switch_room) {
-//			mChatListFragment
+		switch (id) {
+		case R.id.action_switch_room:
 			mChatListFragment.switchRoom();
-			return true;
+			break;
+		case R.id.action_logout:
+			new Thread() {
+
+				@Override
+				public void run() {
+					CouchDB.logout();
+					MainActivity.this.finish();
+				}
+			}.start();
+
+			break;
+		default:
+			break;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -132,20 +146,17 @@ public class MainActivity extends ActionBarActivity implements
 			// getItem is called to instantiate the fragment for the given page.
 			// Return a PlaceholderFragment (defined as a static inner class
 			// below).
-			switch(position)
-			{
+			switch (position) {
 			case 0:
 				mChatListFragment = new ChatListFragment();
 				return mChatListFragment;
 			case 1:
 				return new MediaListFragment();
-				
-				
+
 			default:
 				return null;
 			}
-				
-			 
+
 		}
 
 		@Override
@@ -168,7 +179,5 @@ public class MainActivity extends ActionBarActivity implements
 			return null;
 		}
 	}
-
-
 
 }

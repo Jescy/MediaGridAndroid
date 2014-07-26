@@ -100,7 +100,11 @@ class Member implements Serializable{
  * "2lxQZiUZFLUS3giZ3kBKh3QOIG203eYP5LH=LHbyeAK" left: Array[3] rooms:
  * Array[0] type: "USER" __proto__: Object
  */
-class UserDoc {
+class UserDoc implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8648491488353532229L;
 	String _id;
 	String _rev;
 	String key;
@@ -110,9 +114,9 @@ class UserDoc {
 
 	public UserDoc() {
 		super();
-		_id = "";
-		_rev = "";
-		key = "";
+		_id = null;
+		_rev = null;
+		key = null;
 		left = new Vector<String>();
 		rooms = new Vector<String>();
 		type = "USER";

@@ -26,6 +26,12 @@ public class CouchDB {
 		return user;
 	}
 
+	// DELETE /_session
+	public static JSONObject logout()
+	{
+		JSONObject jsonObject=mHttpService.doDelete("/_session");
+		return jsonObject;
+	}
 	// GET /_session
 	public static JSONObject getSession() {
 		JSONObject user = mHttpService.doGet("/_session");
@@ -140,7 +146,8 @@ public class CouchDB {
 		String url = "/chat/" + userID;
 		JSONObject args = new JSONObject();
 		args.put("_id", userID);
-		args.put("_rev", rev);
+		if(rev!=null)
+			args.put("_rev", rev);
 		args.put("key", key);
 		args.put("rooms", new JSONArray(rooms));
 		args.put("left", new JSONArray(left));

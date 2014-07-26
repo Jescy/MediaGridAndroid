@@ -5,6 +5,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="pick_name">Please pick a user name</string>
+    <string name="name_taken">User name already taken</string>
     <string name="hint_input_name">Input your name</string>
     <string name="ok">OK</string>
     
@@ -57,4 +58,8 @@
     <string name="download_failed">download files failed.</string>
     
     <string name="empty"></string>
+    <string name="configure">config</string>
+    <string name="bad_format">ip or port bad format!!</string>
+    <string name="ip_address">IP Address:</string>
+    <string name="port_num"  >Port Number:</string>
 </resources>

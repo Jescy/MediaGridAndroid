@@ -18,6 +18,7 @@ import org.apache.http.HttpVersion;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -125,11 +126,7 @@ public class HttpService {
 				break;
 			} catch (Exception e) {
 				e.printStackTrace(System.err);
-				try {
-					Thread.sleep(GlobalUtil.RECONNECT_INTERVAL);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
+				GlobalUtil.sleepFor(GlobalUtil.RECONNECT_INTERVAL);
 			}
 		}
 		return jsonObject;
@@ -206,6 +203,20 @@ public class HttpService {
 			httpput.setEntity(new StringEntity(args.toString(), "UTF-8")); // execute
 																			// post
 			mHttpResponse = mHttpClient.execute(httpput);
+			String resultString = EntityUtils.toString(mHttpResponse
+					.getEntity());
+			jsonObject = new JSONObject(resultString);
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+		return jsonObject;
+	}
+	public JSONObject doDelete(String url)
+	{
+		HttpDelete httpDelete = new HttpDelete(mBaseURL+url);
+		JSONObject jsonObject = null;
+		try {
+			mHttpResponse = mHttpClient.execute(httpDelete);
 			String resultString = EntityUtils.toString(mHttpResponse
 					.getEntity());
 			jsonObject = new JSONObject(resultString);

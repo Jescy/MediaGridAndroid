@@ -65,7 +65,8 @@ public class ChatListFragment extends Fragment {
 	private Thread mChatThread = null;
 	private Thread mIMThread = null;
 	private Thread mUserThread = null;
-	private  UserDoc mUserDoc=null;
+	private UserDoc mUserDoc = null;
+
 	public ChatListFragment() {
 
 	}
@@ -75,30 +76,24 @@ public class ChatListFragment extends Fragment {
 		Activity activity = getActivity();
 		Intent intent = activity.getIntent();
 		Bundle bundle = intent.getExtras();
-		try {
-			JSONObject userJsonObject = new JSONObject(
-					bundle.getString("userDoc"));
-			Gson gson = new Gson();
-			mUserDoc = gson.fromJson(userJsonObject.toString(),
-					UserDoc.class);
-			mUser.pubkey = GlobalUtil.genPublicKey();
-			mUser.prikey = GlobalUtil.genPrivateKey();
-			mUser.password = GlobalUtil.genRandomPassword();
-			mUser.room = "General";
-			mUser.username = mUserDoc._id;
 
-			if (!mUserDoc.rooms.contains(mUser.room)) {
-				mUserDoc.rooms.add(mUser.room);
-			}
-			if (mUserDoc.left.contains(mUser.room))
-				mUserDoc.left.remove(mUserDoc.left.indexOf(mUser.room));
-			mUserDoc.key = mUser.pubkey;
+		mUserDoc = (UserDoc) bundle.getSerializable("userDoc");
 
-			saveUserDoc(mUserDoc);
+		mUser.pubkey = GlobalUtil.genPublicKey();
+		mUser.prikey = GlobalUtil.genPrivateKey();
+		mUser.password = GlobalUtil.genRandomPassword();
+		mUser.room = "General";
+		mUser.username = mUserDoc._id;
 
-		} catch (JSONException e) {
-			e.printStackTrace();
+		if (!mUserDoc.rooms.contains(mUser.room)) {
+			mUserDoc.rooms.add(mUser.room);
 		}
+		if (mUserDoc.left.contains(mUser.room))
+			mUserDoc.left.remove(mUserDoc.left.indexOf(mUser.room));
+		mUserDoc.key = mUser.pubkey;
+
+		saveUserDoc(mUserDoc);
+
 	}
 
 	@Override
@@ -217,7 +212,6 @@ public class ChatListFragment extends Fragment {
 			case GlobalUtil.MSG_POLLING_USER:
 				updateUsers((JSONObject) msg.obj);
 				longPollingUser(mUpdateSeq);
-
 				break;
 			case GlobalUtil.MSG_POLLING_CHAT:
 				jsonObject = (JSONObject) msg.obj;
@@ -225,6 +219,7 @@ public class ChatListFragment extends Fragment {
 					mUpdateSeq = jsonObject.getInt("last_seq");
 				} catch (JSONException e) {
 					e.printStackTrace(System.err);
+					GlobalUtil.sleepFor(GlobalUtil.RECONNECT_INTERVAL);
 				}
 				getMessages(jsonObject);
 				break;
@@ -233,10 +228,13 @@ public class ChatListFragment extends Fragment {
 				try {
 					mUpdateSeq = jsonObject.getInt("last_seq");
 					showInstantMessages(jsonObject);
+
 				} catch (JSONException e) {
 					e.printStackTrace(System.err);
+					GlobalUtil.sleepFor(GlobalUtil.RECONNECT_INTERVAL);
 				}
 				longPollingIM(mUpdateSeq);
+
 				break;
 			case GlobalUtil.MSG_CHAT_LIST:
 				@SuppressWarnings("unchecked")
@@ -433,7 +431,7 @@ public class ChatListFragment extends Fragment {
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("chat_from", "message");
 			map.put("chat_to", "every one");
-			map.put("chat_time", new Date().toLocaleString());
+			map.put("chat_time", new Date().toGMTString());
 			map.put("chat_msg", msg);
 			msgs.add(map);
 		}
@@ -458,7 +456,7 @@ public class ChatListFragment extends Fragment {
 			String chat_from = doc.getString("from");
 			String chat_to = doc.getString("to");
 			String chat_time = new java.util.Date(doc.getLong("created_at"))
-					.toLocaleString();
+					.toGMTString();
 			String chat_msg = to.getString("msg");
 
 			Map<String, Object> map = new HashMap<String, Object>();
@@ -499,7 +497,7 @@ public class ChatListFragment extends Fragment {
 						String chat_from = value.getString("nick");
 						String chat_to = mUser.username;
 						String chat_time = new java.util.Date(
-								value.getLong("created_at")).toLocaleString();
+								value.getLong("created_at")).toGMTString();
 						String chat_msg = to.getString("msg");
 
 						Map<String, Object> map = new HashMap<String, Object>();
@@ -603,13 +601,13 @@ public class ChatListFragment extends Fragment {
 	}
 
 	public void switchRoom() {
-//		mMsgQueue.clear();
-//		mMSGs.clear();
-//		mDatalist.clear();
-//		mChatThread.stop();
-//		mIMThread.stop();
-//		mUserThread.stop();
-//		mUser.room="kkk";
-//		saveUserDoc(mUserDoc);
+		// mMsgQueue.clear();
+		// mMSGs.clear();
+		// mDatalist.clear();
+		// mChatThread.stop();
+		// mIMThread.stop();
+		// mUserThread.stop();
+		// mUser.room="kkk";
+		// saveUserDoc(mUserDoc);
 	}
 }

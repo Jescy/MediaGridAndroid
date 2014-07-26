@@ -995,7 +995,7 @@ containing a value of this type.
         public static final int pulltorefresh=0x7f020062;
     }
     public static final class id {
-        public static final int action_about=0x7f050068;
+        public static final int action_about=0x7f050074;
         public static final int action_bar=0x7f05001c;
         public static final int action_bar_activity_content=0x7f050015;
         public static final int action_bar_container=0x7f05001b;
@@ -1004,22 +1004,30 @@ containing a value of this type.
         public static final int action_bar_subtitle=0x7f050023;
         public static final int action_bar_title=0x7f050022;
         public static final int action_context_bar=0x7f05001d;
-        public static final int action_logout=0x7f050067;
+        public static final int action_logout=0x7f050073;
         public static final int action_menu_divider=0x7f050016;
         public static final int action_menu_presenter=0x7f050017;
         public static final int action_mode_close_button=0x7f050024;
-        public static final int action_settings=0x7f050065;
+        public static final int action_settings=0x7f050071;
+        public static final int action_switch_room=0x7f050072;
         public static final int activity_chooser_view_content=0x7f050025;
         public static final int always=0x7f05000b;
         public static final int beginning=0x7f050011;
-        public static final int btn_about=0x7f050064;
-        public static final int btn_log_out=0x7f050063;
-        public static final int btn_login=0x7f05004b;
-        public static final int btn_mkdir=0x7f050058;
+        public static final int btn_about=0x7f050070;
+        public static final int btn_config=0x7f050055;
+        public static final int btn_log_out=0x7f05006f;
+        public static final int btn_login=0x7f05004c;
+        public static final int btn_mkdir=0x7f050061;
+        public static final int btn_name0=0x7f05004e;
+        public static final int btn_name1=0x7f05004f;
+        public static final int btn_name2=0x7f050050;
+        public static final int btn_name3=0x7f050051;
+        public static final int btn_name4=0x7f050052;
+        public static final int btn_name5=0x7f050053;
         public static final int btn_receiver=0x7f050045;
         public static final int btn_send=0x7f050043;
-        public static final int btn_switch_room=0x7f050062;
-        public static final int btn_upload=0x7f050057;
+        public static final int btn_switch_room=0x7f05006e;
+        public static final int btn_upload=0x7f050060;
         public static final int chat_from=0x7f05003d;
         public static final int chat_list=0x7f050044;
         public static final int chat_msg=0x7f050040;
@@ -1036,33 +1044,32 @@ containing a value of this type.
         public static final int end=0x7f050013;
         public static final int expand_activities_button=0x7f050026;
         public static final int expanded_menu=0x7f05002c;
-        public static final int file_ico=0x7f050050;
-        public static final int file_list=0x7f050059;
-        public static final int file_name=0x7f050051;
-        public static final int file_size=0x7f050052;
+        public static final int file_ico=0x7f050059;
+        public static final int file_list=0x7f050062;
+        public static final int file_name=0x7f05005a;
+        public static final int file_size=0x7f05005b;
         public static final int filedialogitem_img=0x7f050047;
         public static final int filedialogitem_name=0x7f050048;
         public static final int filedialogitem_path=0x7f050049;
-        public static final int footer_progress=0x7f05004f;
-        public static final int head_arrowImageView=0x7f05005e;
-        public static final int head_contentLayout=0x7f05005d;
-        public static final int head_lastUpdatedTextView=0x7f050061;
-        public static final int head_progressBar=0x7f05005f;
-        public static final int head_tipsTextView=0x7f050060;
+        public static final int footer_progress=0x7f050058;
+        public static final int head_arrowImageView=0x7f050067;
+        public static final int head_contentLayout=0x7f050066;
+        public static final int head_lastUpdatedTextView=0x7f05006a;
+        public static final int head_progressBar=0x7f050068;
+        public static final int head_tipsTextView=0x7f050069;
         public static final int home=0x7f050014;
         public static final int homeAsUp=0x7f050005;
         public static final int icon=0x7f05002a;
         public static final int ifRoom=0x7f05000a;
         public static final int image=0x7f050027;
-        public static final int layout_path=0x7f050054;
+        public static final int layout_path=0x7f05005d;
         public static final int layout_send_msg=0x7f050041;
-        public static final int layout_tools=0x7f050056;
+        public static final int layout_tools=0x7f05005f;
         public static final int listMode=0x7f050001;
-        public static final int list_footview=0x7f05004d;
+        public static final int list_footview=0x7f050056;
         public static final int list_item=0x7f050029;
-        public static final int lstUserNames=0x7f05004c;
-        public static final int member_list=0x7f05005c;
-        public static final int member_name=0x7f05005b;
+        public static final int member_list=0x7f050065;
+        public static final int member_name=0x7f050064;
         public static final int middle=0x7f050012;
         public static final int never=0x7f050009;
         public static final int none=0x7f050010;
@@ -1087,17 +1094,22 @@ containing a value of this type.
         public static final int showTitle=0x7f050006;
         public static final int split_action_bar=0x7f05001e;
         public static final int submit_area=0x7f050039;
-        public static final int switch_room=0x7f050066;
         public static final int tabMode=0x7f050002;
-        public static final int text_view=0x7f05004e;
+        public static final int text_view=0x7f050057;
         public static final int title=0x7f05002b;
         public static final int top_action_bar=0x7f050020;
+        public static final int tv_bad_format=0x7f05006b;
+        public static final int tv_msg=0x7f05004d;
+        public static final int tv_server=0x7f050054;
+        public static final int txt_ip=0x7f05006c;
         public static final int txt_msg=0x7f050042;
-        public static final int txt_path=0x7f050055;
+        public static final int txt_path=0x7f05005e;
+        public static final int txt_port=0x7f05006d;
+        public static final int txt_username=0x7f05004b;
         public static final int up=0x7f050021;
-        public static final int upload_time=0x7f050053;
+        public static final int upload_time=0x7f05005c;
         public static final int useLogo=0x7f050003;
-        public static final int user_photo=0x7f05005a;
+        public static final int user_photo=0x7f050063;
         public static final int vw1=0x7f050046;
         public static final int withText=0x7f05000c;
     }
@@ -1162,8 +1174,9 @@ containing a value of this type.
         public static final int member_list_item=0x7f030020;
         public static final int member_main=0x7f030021;
         public static final int pulllistview_header=0x7f030022;
-        public static final int settings=0x7f030023;
-        public static final int support_simple_spinner_dropdown_item=0x7f030024;
+        public static final int server_config=0x7f030023;
+        public static final int settings=0x7f030024;
+        public static final int support_simple_spinner_dropdown_item=0x7f030025;
     }
     public static final class menu {
         public static final int main=0x7f0c0000;
@@ -1210,60 +1223,65 @@ containing a value of this type.
         /**  Description of a share target (both in the list of such or the default share button) in a ShareActionProvider (share UI). [CHAR LIMIT=NONE] 
          */
         public static final int abc_shareactionprovider_share_with_application=0x7f0a000b;
-        public static final int about=0x7f0a002d;
+        public static final int about=0x7f0a002e;
         public static final int action_settings=0x7f0a000f;
         public static final int app_name=0x7f0a000d;
-        public static final int date_format=0x7f0a001d;
-        public static final int download_failed=0x7f0a0035;
-        public static final int download_success=0x7f0a0034;
-        public static final int empty=0x7f0a0036;
-        public static final int everyone=0x7f0a0026;
+        public static final int bad_format=0x7f0a0039;
+        public static final int configure=0x7f0a0038;
+        public static final int date_format=0x7f0a001e;
+        public static final int download_failed=0x7f0a0036;
+        public static final int download_success=0x7f0a0035;
+        public static final int empty=0x7f0a0037;
+        public static final int everyone=0x7f0a0027;
         /**  data for testing 
          */
-        public static final int file_name=0x7f0a001f;
-        public static final int file_size=0x7f0a0021;
-        public static final int hello=0x7f0a0027;
+        public static final int file_name=0x7f0a0020;
+        public static final int file_size=0x7f0a0022;
+        public static final int hello=0x7f0a0028;
         public static final int hello_world=0x7f0a000e;
         /**  send message 
          */
-        public static final int hint_input_msg=0x7f0a0029;
-        public static final int hint_input_name=0x7f0a0011;
-        public static final int load_failed=0x7f0a0033;
-        public static final int load_success=0x7f0a0032;
-        public static final int log_out=0x7f0a002c;
-        public static final int makedir_failed=0x7f0a0031;
-        public static final int makedir_success=0x7f0a0030;
-        public static final int mkdir=0x7f0a001c;
-        public static final int ok=0x7f0a0012;
-        public static final int path=0x7f0a0028;
+        public static final int hint_input_msg=0x7f0a002a;
+        public static final int hint_input_name=0x7f0a0012;
+        public static final int ip_address=0x7f0a003a;
+        public static final int load_failed=0x7f0a0034;
+        public static final int load_success=0x7f0a0033;
+        public static final int log_out=0x7f0a002d;
+        public static final int makedir_failed=0x7f0a0032;
+        public static final int makedir_success=0x7f0a0031;
+        public static final int mkdir=0x7f0a001d;
+        public static final int name_taken=0x7f0a0011;
+        public static final int ok=0x7f0a0013;
+        public static final int path=0x7f0a0029;
         public static final int pick_name=0x7f0a0010;
-        public static final int pull_to_refresh=0x7f0a0018;
-        public static final int refreshing=0x7f0a0019;
+        public static final int port_num=0x7f0a003b;
+        public static final int pull_to_refresh=0x7f0a0019;
+        public static final int refreshing=0x7f0a001a;
         /**  pull to refresh 
          */
-        public static final int release_to_refresh=0x7f0a0017;
-        public static final int right_arrow=0x7f0a001e;
-        public static final int send_msg=0x7f0a002a;
+        public static final int release_to_refresh=0x7f0a0018;
+        public static final int right_arrow=0x7f0a001f;
+        public static final int send_msg=0x7f0a002b;
         /**  settings 
          */
-        public static final int switch_room=0x7f0a002b;
-        public static final int test_time=0x7f0a0020;
-        public static final int testuserA=0x7f0a0023;
-        public static final int testuserB=0x7f0a0024;
-        public static final int testuserC=0x7f0a0025;
-        public static final int title_activity_media_main=0x7f0a0013;
-        public static final int title_chat=0x7f0a0014;
-        public static final int title_media=0x7f0a0015;
-        public static final int title_setting=0x7f0a0016;
-        public static final int updating=0x7f0a001a;
+        public static final int switch_room=0x7f0a002c;
+        public static final int test_time=0x7f0a0021;
+        public static final int testuserA=0x7f0a0024;
+        public static final int testuserB=0x7f0a0025;
+        public static final int testuserC=0x7f0a0026;
+        public static final int title_activity_media_main=0x7f0a0014;
+        public static final int title_chat=0x7f0a0015;
+        public static final int title_media=0x7f0a0016;
+        public static final int title_setting=0x7f0a0017;
+        public static final int updating=0x7f0a001b;
         /**  upload & mkdir 
          */
-        public static final int upload=0x7f0a001b;
-        public static final int upload_failed=0x7f0a002f;
+        public static final int upload=0x7f0a001c;
+        public static final int upload_failed=0x7f0a0030;
         /**  promotion message 
          */
-        public static final int upload_success=0x7f0a002e;
-        public static final int user_photo=0x7f0a0022;
+        public static final int upload_success=0x7f0a002f;
+        public static final int user_photo=0x7f0a0023;
     }
     public static final class style {
         /** 
