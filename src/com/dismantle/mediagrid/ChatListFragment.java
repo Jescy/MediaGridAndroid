@@ -3,10 +3,8 @@ package com.dismantle.mediagrid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Vector;
 
 import org.json.JSONArray;
@@ -15,14 +13,11 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings.Global;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,9 +28,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SimpleAdapter;
 
-import com.dismantle.mediagrid.RTPullListView.OnRefreshListener;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -297,9 +290,12 @@ public class ChatListFragment extends Fragment {
 					JSONObject resJson = CouchDB.saveUserDoc(userDoc._id,
 							userDoc._rev, userDoc.key, userDoc.type,
 							userDoc.rooms, userDoc.left);
-					if (!resJson.has("error"))
+					if (!resJson.has("error")){
+						String rev=resJson.getString("rev");
+						mUserDoc._rev=rev;
 						myHandler
 								.sendEmptyMessage(GlobalUtil.MSG_SAVE_USER_DOC_SUCCESS);
+					}
 					else
 						myHandler
 								.sendEmptyMessage(GlobalUtil.MSG_SAVE_USER_DOC_FAILED);
@@ -601,13 +597,21 @@ public class ChatListFragment extends Fragment {
 	}
 
 	public void switchRoom() {
-		// mMsgQueue.clear();
-		// mMSGs.clear();
-		// mDatalist.clear();
+		mMsgQueue.clear();
+		mMSGs.clear();
+		mDatalist.clear();
+		mChatThread.interrupt();
+		mIMThread.interrupt();
+		mUserThread.interrupt();
 		// mChatThread.stop();
 		// mIMThread.stop();
 		// mUserThread.stop();
-		// mUser.room="kkk";
-		// saveUserDoc(mUserDoc);
+		mUser.room = "kkk";
+		if (!mUserDoc.rooms.contains(mUser.room)) {
+			mUserDoc.rooms.add(mUser.room);
+		}
+		if (mUserDoc.left.contains(mUser.room))
+			mUserDoc.left.remove(mUserDoc.left.indexOf(mUser.room));
+		saveUserDoc(mUserDoc);
 	}
 }

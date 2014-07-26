@@ -5,21 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.EditText;
 import android.widget.SimpleAdapter;
-
-import com.dismantle.mediagrid.RTPullListView.OnRefreshListener;
 
 public class ChooseMemberActivity extends Activity {
 	private RTPullListView mPullListView;

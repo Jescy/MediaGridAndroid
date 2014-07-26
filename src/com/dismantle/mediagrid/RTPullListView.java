@@ -5,7 +5,6 @@ import java.util.Date;
 import android.content.Context;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -329,7 +328,7 @@ public class RTPullListView extends ListView implements OnScrollListener {
 	private void measureView(View child) {
 		ViewGroup.LayoutParams p = child.getLayoutParams();
 		if (p == null) {
-			p = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+			p = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT);
 		}
 		int childWidthSpec = ViewGroup.getChildMeasureSpec(0, 0 + 0, p.width);

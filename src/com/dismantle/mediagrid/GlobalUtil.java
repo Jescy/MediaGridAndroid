@@ -5,10 +5,11 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import android.R.integer;
+import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Message;
 
+@SuppressLint("DefaultLocale")
 public class GlobalUtil {
 
 	public static final int SOURCE_WEIBO_LIST = 1;
