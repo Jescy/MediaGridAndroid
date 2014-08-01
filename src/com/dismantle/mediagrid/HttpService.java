@@ -241,9 +241,10 @@ public class HttpService {
 			fileExplain
 					.append("Content-Disposition: form-data;name=\"_attachments\";filename=\""
 							+ uploadFile.getName() + "\"\r\n");
+			//MIME type
 			fileExplain
-					.append("Content-Type: application/octet-stream\r\n\r\n");
-			fileExplain.append("\r\n");
+					.append("Content-Type: ");
+			fileExplain.append(MIMEType.getMIMEType(uploadFile)+"\r\n\r\n");
 			arrayOutputStream.write(fileExplain.toString().getBytes());
 
 			byte[] buffer = new byte[1024];

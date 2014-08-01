@@ -4,6 +4,8 @@ import java.util.Vector;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.app.ActionBar;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -34,7 +36,9 @@ public class LoginActivity extends ActionBarActivity {
 		setContentView(R.layout.login_activity);
 
 		mTvMSG = (TextView) findViewById(R.id.tv_msg);
-
+		
+		setTitle(getString(R.string.media_grid));
+		
 		SharedPreferences sp = LoginActivity.this.getSharedPreferences(
 				"ServerConfig", MODE_PRIVATE);
 		String lastIP = sp.getString("IP", "127.0.0.1");
@@ -45,6 +49,7 @@ public class LoginActivity extends ActionBarActivity {
 		tvServer.setText(lastIP + ":" + lastPort);
 
 		Button btnConfig = (Button) findViewById(R.id.btn_config);
+		btnConfig.setTypeface(GlobalUtil.getFontAwesome(this));
 		btnConfig.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
@@ -78,6 +83,7 @@ public class LoginActivity extends ActionBarActivity {
 			}
 		});
 		Button btnOK = (Button) findViewById(R.id.btn_login);
+		btnOK.setTypeface(GlobalUtil.getFontAwesome(this));
 		btnOK.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
@@ -118,7 +124,7 @@ public class LoginActivity extends ActionBarActivity {
 			}
 		});
 		initNames();
-
+		
 	}
 
 	@Override
@@ -211,8 +217,8 @@ public class LoginActivity extends ActionBarActivity {
 			if (name == "")
 				mBtnNames[i].setVisibility(View.INVISIBLE);
 			else {
-				if(name.length()>6)
-					name=name.substring(0,6)+"*";
+				if (name.length() > 6)
+					name = name.substring(0, 6) + "*";
 				mBtnNames[i].setText(name);
 				mBtnNames[i].setVisibility(View.VISIBLE);
 			}
@@ -247,7 +253,7 @@ public class LoginActivity extends ActionBarActivity {
 					String name = names.elementAt(index);
 					String password = passwords.elementAt(index);
 					login(name, password);
-					
+
 				}
 			});
 
@@ -279,17 +285,19 @@ public class LoginActivity extends ActionBarActivity {
 			public void run() {
 				JSONObject resJson = CouchDB.getSession();
 				try {
-					JSONObject userCtx = resJson.getJSONObject("userCtx");
-					String name = userCtx.getString("name");
-					if (!name.equals("") && !name.equals("null")) {
+					if (resJson != null) {
+						JSONObject userCtx = resJson.getJSONObject("userCtx");
+						String name = userCtx.getString("name");
+						if (!name.equals("") && !name.equals("null")) {
 
-						GlobalUtil.sendMSG(handler,
-								GlobalUtil.MSG_GET_SESSION_SUCCESS, name);
-
-					} else {
-						GlobalUtil.sendMSG(handler,
-								GlobalUtil.MSG_GET_SESSION_FAILED, null);
+							GlobalUtil.sendMSG(handler,
+									GlobalUtil.MSG_GET_SESSION_SUCCESS, name);
+							return;
+						}
 					}
+					GlobalUtil.sendMSG(handler,
+							GlobalUtil.MSG_GET_SESSION_FAILED, null);
+
 				} catch (JSONException e1) {
 					e1.printStackTrace();
 				}
@@ -346,4 +354,5 @@ public class LoginActivity extends ActionBarActivity {
 		}.start();
 
 	}
+
 }

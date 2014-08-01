@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.SimpleAdapter;
 
@@ -40,7 +43,7 @@ public class ChooseMemberActivity extends Activity {
 
 		// adapter = new ArrayAdapter<String>(this,
 		// android.R.layout.simple_list_item_1, dataList);
-		mAdapter = new SimpleAdapter(this, mDatalist,
+		mAdapter = new ChooseMemberSimpleAdapter(this, mDatalist,
 				R.layout.member_list_item, new String[] { "member_name" },
 				new int[] { R.id.member_name });
 		// setListAdapter(adapter);
@@ -62,7 +65,7 @@ public class ChooseMemberActivity extends Activity {
 			}
 
 		});
-		setTitle("Message Receiver:");
+		setTitle("Message Recipient:");
 
 	}
 
@@ -81,5 +84,22 @@ public class ChooseMemberActivity extends Activity {
 		}
 		mDatalist.clear();
 		mDatalist.addAll(dList);
+	}
+}
+class ChooseMemberSimpleAdapter extends SimpleAdapter {
+
+	private Context mContext = null;
+	public ChooseMemberSimpleAdapter(Context context,
+			List<? extends Map<String, ?>> data, int resource, String[] from,
+			int[] to) {
+		super(context, data, resource, from, to);
+		mContext = context;
+	}
+
+	public View getView(int position, View convertView, ViewGroup parent) {
+		View res=super.getView(position, convertView, parent);
+		TextView textView=(TextView)res.findViewById(R.id.user_photo);
+		textView.setTypeface(GlobalUtil.getFontAwesome(mContext));
+		return res;
 	}
 }

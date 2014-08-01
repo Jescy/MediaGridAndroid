@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -35,7 +36,7 @@ import com.google.gson.Gson;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class ChatListFragment extends Fragment {
+public class ChatFragment extends Fragment {
 
 	private RTPullListView mPullListView = null;
 
@@ -63,7 +64,7 @@ public class ChatListFragment extends Fragment {
 	private Thread mUserThread = null;
 	private UserDoc mUserDoc = null;
 
-	public ChatListFragment() {
+	public ChatFragment() {
 
 	}
 
@@ -135,7 +136,10 @@ public class ChatListFragment extends Fragment {
 			}
 		});
 		mTextMsg = (EditText) rootView.findViewById(R.id.txt_msg);
+
 		mBtnSend = (Button) rootView.findViewById(R.id.btn_send);
+		mBtnSend.setTypeface(GlobalUtil.getFontAwesome(thisActivity));
+		mBtnSend.setText(getResources().getString(R.string.fa_paper_plane));
 		mBtnSend.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
@@ -359,7 +363,9 @@ public class ChatListFragment extends Fragment {
 			@Override
 			public void run() {
 
-				JSONObject resJson = CouchDB.longPollingUser(seq, mUser.room);
+				JSONObject resJson = null;
+				while (resJson == null)
+					resJson = CouchDB.longPollingUser(seq, mUser.room);
 				Message msg = new Message();
 				msg.what = GlobalUtil.MSG_POLLING_USER;
 				msg.obj = resJson;

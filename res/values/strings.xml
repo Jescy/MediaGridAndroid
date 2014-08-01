@@ -4,9 +4,9 @@
     <string name="app_name">MediaGrid</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="pick_name">Please pick a user name</string>
+    <string name="pick_name">Picking a user name</string>
     <string name="name_taken">User name already taken</string>
-    <string name="hint_input_name">Input your name</string>
+    <string name="hint_input_name">Input user name</string>
     <string name="ok">OK</string>
     
     <string name="title_activity_media_main">MediaMainActivity</string>
@@ -62,4 +62,6 @@
     <string name="bad_format">ip or port bad format!!</string>
     <string name="ip_address">IP Address:</string>
     <string name="port_num"  >Port Number:</string>
+    
+    <string name="media_grid">MediaGrid</string>
 </resources>

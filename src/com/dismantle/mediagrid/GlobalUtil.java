@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Message;
 
@@ -125,4 +127,14 @@ public class GlobalUtil {
 		else
 			handler.sendMessage(msg);
 	}
+	
+	//font awesome
+	private static Typeface mFontAwesome=null;
+	public static Typeface getFontAwesome(Context context)
+	{
+		if(mFontAwesome==null)
+			mFontAwesome = Typeface.createFromAsset(context.getAssets(), "fontawesome-webfont.ttf");
+		return mFontAwesome;
+	}
+	
 }

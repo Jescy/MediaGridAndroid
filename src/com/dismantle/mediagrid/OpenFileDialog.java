@@ -66,6 +66,7 @@ public class OpenFileDialog {
 			RelativeLayout relativeLayout = new RelativeLayout(context);
 			Button btnOK = new Button(context);
 			btnOK.setText("Select this directory");
+			btnOK.setBackgroundResource(R.drawable.button_send_bg);
 			btnOK.setId(12345678);
 			btnOK.setOnClickListener(new OnClickListener() {
 

@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,7 +40,7 @@ import com.dismantle.mediagrid.RTPullListView.OnRefreshListener;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MediaListFragment extends Fragment {
+public class MediaFragment extends Fragment {
 
 	private RTPullListView mPullListView = null;
 
@@ -55,7 +56,7 @@ public class MediaListFragment extends Fragment {
 	Dialog mUploadFileDialog = null;
 	Dialog mDownFileDialog = null;
 
-	public MediaListFragment() {
+	public MediaFragment() {
 	}
 
 	@Override
@@ -66,11 +67,17 @@ public class MediaListFragment extends Fragment {
 		mPullListView = (RTPullListView) rootView.findViewById(R.id.file_list);
 		mTxtPath = (TextView) rootView.findViewById(R.id.txt_path);
 		mBtnMakeDir = (Button) rootView.findViewById(R.id.btn_mkdir);
+		mBtnMakeDir.setTypeface(GlobalUtil.getFontAwesome(thisActivity));
+		mBtnMakeDir.setText(getResources().getString(R.string.fa_level_down)+mBtnMakeDir.getText());
+		
 		mBtnUpload = (Button) rootView.findViewById(R.id.btn_upload);
-
+		mBtnUpload.setTypeface(GlobalUtil.getFontAwesome(thisActivity));
+		mBtnUpload.setText(getResources().getString(R.string.fa_cloud_upload)+mBtnUpload.getText());
 		mDatalist = new ArrayList<Map<String, Object>>();
+		
+		
 
-		mAdapter = new SimpleAdapter(thisActivity, mDatalist,
+		mAdapter = new MediaSimpleAdapter(thisActivity, mDatalist,
 				R.layout.media_list_item, new String[] { "file_ico",
 						"file_name", "file_size", "upload_time" }, new int[] {
 						R.id.file_ico, R.id.file_name, R.id.file_size,
@@ -102,8 +109,7 @@ public class MediaListFragment extends Fragment {
 					mCurrentKeys.add(fileurl);
 					loadFiles();
 				} else if (type.equals("FILE")) {
-					Toast.makeText(thisActivity, fileurl, Toast.LENGTH_SHORT)
-							.show();
+					
 					mDownFileDialog = OpenFileDialog.createDialog(getActivity(),
 							"choose a directory", new CallbackBundle() {
 
@@ -269,7 +275,7 @@ public class MediaListFragment extends Fragment {
 						map.put("id", "");
 						map.put("file_name", "..");
 						map.put("type", "DIR");
-						map.put("file_ico", R.drawable.folder_ico);
+						map.put("file_ico", getString(R.string.fa_level_up));
 						map.put("upload_time", "");
 						map.put("file_url", "");
 						map.put("file_size", "---------");
@@ -283,18 +289,21 @@ public class MediaListFragment extends Fragment {
 
 						map = new HashMap<String, Object>();
 						map.put("id", id);
-						map.put("file_name", jsonValue.getString("filename"));
+						String fileName = jsonValue.getString("filename");
+						map.put("file_name", fileName);
 						String fileSize = jsonValue.getString("size");
 						map.put("type", jsonValue.getString("type"));
 						map.put("upload_time", jsonValue.getString("time"));
 						map.put("file_url", jsonValue.getString("fileurl"));
 						if (fileSize.equals("-")) {
 							map.put("file_size", "---------");
-							map.put("file_ico", R.drawable.folder_ico);
+							map.put("file_ico", getString(R.string.fa_folder));
 							dirs.add(map);
 						} else {
 							map.put("file_size", fileSize + "B");
-							map.put("file_ico", R.drawable.file_ico);
+							String posix = fileName.substring(fileName.lastIndexOf("."));
+							int iconID = FileTypeIcon.getIcon(posix);
+							map.put("file_ico", getString(iconID));
 							files.add(map);
 						}
 						
@@ -412,5 +421,22 @@ public class MediaListFragment extends Fragment {
 			layoutParams.height = LayoutParams.MATCH_PARENT;
 			mUploadFileDialog.getWindow().setAttributes(layoutParams);
 		}
+	}
+}
+class MediaSimpleAdapter extends SimpleAdapter {
+
+	private Context mContext = null;
+	public MediaSimpleAdapter(Context context,
+			List<? extends Map<String, ?>> data, int resource, String[] from,
+			int[] to) {
+		super(context, data, resource, from, to);
+		mContext = context;
+	}
+
+	public View getView(int position, View convertView, ViewGroup parent) {
+		View res=super.getView(position, convertView, parent);
+		TextView textView=(TextView)res.findViewById(R.id.file_ico);
+		textView.setTypeface(GlobalUtil.getFontAwesome(mContext));
+		return res;
 	}
 }

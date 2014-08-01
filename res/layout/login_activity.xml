@@ -41,6 +41,7 @@
                 android:layout_marginLeft="35dp"
                 android:layout_marginRight="10dp"
                 android:id="@+id/txt_username"
+                 android:singleLine="true"
                 android:background="@drawable/chat_input_bg"
                 android:hint="@string/hint_input_name" />
 
@@ -49,8 +50,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/button_send_bg"
-                android:focusable="true"
-                android:text="@string/ok" />
+                android:textColor="#0000CC"
+                android:text="@string/fa_user" />
         </LinearLayout>
 
         <TextView
@@ -153,7 +154,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:background="@drawable/button_send_bg"
-                android:text="@string/configure"
+                android:text="@string/fa_cog"
                 android:textSize="15sp" />
         </LinearLayout>
     </LinearLayout>

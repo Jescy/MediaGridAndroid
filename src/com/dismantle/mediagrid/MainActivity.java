@@ -1,17 +1,24 @@
 package com.dismantle.mediagrid;
 
 import java.util.Locale;
+import java.util.zip.Inflater;
 
+import android.support.v7.app.ActionBar.Tab;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.LayoutDirection;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 public class MainActivity extends ActionBarActivity implements
 		ActionBar.TabListener {
@@ -30,7 +37,7 @@ public class MainActivity extends ActionBarActivity implements
 	 */
 	ViewPager mViewPager;
 
-	private ChatListFragment mChatListFragment = null;
+	private ChatFragment mChatListFragment = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +48,9 @@ public class MainActivity extends ActionBarActivity implements
 		final ActionBar actionBar = getSupportActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
+		actionBar.setTitle(getResources().getString(R.string.media_grid));
+		
+		
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the activity.
 		mSectionsPagerAdapter = new SectionsPagerAdapter(
@@ -49,7 +59,7 @@ public class MainActivity extends ActionBarActivity implements
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-
+		
 		// When swiping between different sections, select the corresponding
 		// tab. We can also use ActionBar.Tab#select() to do this if we have
 		// a reference to the Tab.
@@ -67,9 +77,23 @@ public class MainActivity extends ActionBarActivity implements
 			// the adapter. Also specify this Activity object, which implements
 			// the TabListener interface, as the callback (listener) for when
 			// this tab is selected.
-			actionBar.addTab(actionBar.newTab()
-					.setText(mSectionsPagerAdapter.getPageTitle(i))
-					.setTabListener(this));
+			Tab tab = actionBar.newTab();
+
+//			TextView tView = new TextView(this);
+//			tView.setTypeface(GlobalUtil.getFontAwesome(this));
+//			tView.setTextSize(20);
+//			tView.setText(mSectionsPagerAdapter.getPageTitle(i));
+//			tView.setTextColor(getResources().getColor(android.R.color.white));
+			
+			View titleView = LayoutInflater.from(this).inflate(R.layout.fragment_title, null);
+			TextView textView = (TextView)titleView.findViewById(R.id.frag_title);
+			textView.setTypeface(GlobalUtil.getFontAwesome(this));
+			textView.setText(mSectionsPagerAdapter.getPageTitle(i));
+			
+			tab.setCustomView(titleView);
+			tab.setTabListener(this);
+			
+			actionBar.addTab(tab);
 		}
 	}
 
@@ -78,6 +102,7 @@ public class MainActivity extends ActionBarActivity implements
 
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.media_main, menu);
+		
 		return true;
 	}
 
@@ -143,10 +168,10 @@ public class MainActivity extends ActionBarActivity implements
 			// below).
 			switch (position) {
 			case 0:
-				mChatListFragment = new ChatListFragment();
+				mChatListFragment = new ChatFragment();
 				return mChatListFragment;
 			case 1:
-				return new MediaListFragment();
+				return new MediaFragment();
 
 			default:
 				return null;
@@ -165,11 +190,9 @@ public class MainActivity extends ActionBarActivity implements
 			Locale l = Locale.getDefault();
 			switch (position) {
 			case 0:
-				return getString(R.string.title_chat).toUpperCase(l);
+				return getString(R.string.fa_comment_o)+" "+getString(R.string.title_chat).toUpperCase(l);
 			case 1:
-				return getString(R.string.title_media).toUpperCase(l);
-			case 2:
-				return getString(R.string.title_setting).toUpperCase(l);
+				return getString(R.string.fa_share_alt)+" "+getString(R.string.title_media).toUpperCase(l);
 			}
 			return null;
 		}
