@@ -9,7 +9,7 @@
             android:layout_height="wrap_content"
             android:text="good"
             android:layout_gravity="center_horizontal|bottom"
-            android:textColor="#AAAAAA"
+            android:textColor="#C8C8C8"
             android:textSize="20sp" />
     
 </LinearLayout>

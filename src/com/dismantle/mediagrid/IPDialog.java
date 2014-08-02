@@ -27,14 +27,14 @@ public class IPDialog {
 		final AlertDialog alertDialog = new AlertDialog.Builder(context)
 				.setTitle(title)
 				.setView(viewConfig)
-				.setPositiveButton(android.R.string.ok,
+				.setPositiveButton(R.string.ok,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int which) {
 
 							}
 						})
-				.setNegativeButton(android.R.string.cancel,
+				.setNegativeButton(R.string.cancel,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int which) {

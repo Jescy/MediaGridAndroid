@@ -379,5 +379,6 @@
 	<string name="fa_file_zip_o">&#xf1c6;</string>
 	<string name="fa_file_movie_o">&#xf1c8;</string>
 	<string name="fa_file_code_o">&#xf1c9;</string>
-
+	<string name="fa_file_archive_o">&#xf1c6;</string>
+	<string name="fa_file_pdf_o">&#xf1c1;</string>
 </resources>

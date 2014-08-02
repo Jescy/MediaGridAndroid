@@ -8,6 +8,7 @@
     <string name="name_taken">User name already taken</string>
     <string name="hint_input_name">Input user name</string>
     <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
     
     <string name="title_activity_media_main">MediaMainActivity</string>
     <string name="title_chat">Chat</string>

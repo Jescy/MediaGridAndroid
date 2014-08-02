@@ -17,6 +17,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -437,6 +438,7 @@ class MediaSimpleAdapter extends SimpleAdapter {
 		View res=super.getView(position, convertView, parent);
 		TextView textView=(TextView)res.findViewById(R.id.file_ico);
 		textView.setTypeface(GlobalUtil.getFontAwesome(mContext));
+		textView.setTextColor(Color.parseColor("#66CD00"));
 		return res;
 	}
 }

@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.LayoutDirection;
@@ -89,7 +90,6 @@ public class MainActivity extends ActionBarActivity implements
 			TextView textView = (TextView)titleView.findViewById(R.id.frag_title);
 			textView.setTypeface(GlobalUtil.getFontAwesome(this));
 			textView.setText(mSectionsPagerAdapter.getPageTitle(i));
-			
 			tab.setCustomView(titleView);
 			tab.setTabListener(this);
 			
@@ -196,6 +196,7 @@ public class MainActivity extends ActionBarActivity implements
 			}
 			return null;
 		}
+		
 	}
 
 }

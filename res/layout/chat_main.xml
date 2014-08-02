@@ -46,6 +46,7 @@
             android:layout_marginLeft="3dp"
             android:layout_marginRight="3dp"
             android:background="@drawable/button_send_bg"
+            android:textColor="#3F47CC"
             android:text="@string/send_msg" />
     </RelativeLayout>
 

@@ -38,6 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/button_send_bg"
+            android:textColor="#76EE00"
             android:text="@string/upload" />
 
         <Button

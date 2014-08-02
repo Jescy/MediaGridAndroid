@@ -645,7 +645,7 @@ public class ChatFragment extends Fragment {
 		new AlertDialog.Builder(getActivity())
 				.setTitle("Switch room")
 				.setView(txtRoom)
-				.setPositiveButton(android.R.string.ok,
+				.setPositiveButton(R.string.ok,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int which) {
@@ -670,7 +670,7 @@ public class ChatFragment extends Fragment {
 								saveUserDoc(mUserDoc);
 							}
 						})
-				.setNegativeButton(android.R.string.cancel,
+				.setNegativeButton(R.string.cancel,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int which) {
