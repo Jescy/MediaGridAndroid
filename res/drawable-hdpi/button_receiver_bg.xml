@@ -3,8 +3,8 @@
 
     <item android:state_pressed="true"><shape>
             <size android:height="12dp" />
-
-            <solid android:color="#8AC9DA" />
+			
+            <solid android:color="@color/blue_basic" />
 
             <stroke android:dashGap="0.0dip" android:dashWidth="1.0dip" android:width="1.0dip" android:color="#A3A3A3" />
 
@@ -16,7 +16,7 @@
     <item><shape>
             <size android:height="12dp" />
 
-            <solid android:color="#9AD9EA" />
+            <solid android:color="@color/blue_light" />
 			
             <stroke android:dashGap="0.0dip" android:dashWidth="1.0dip" android:width="1.0dip" android:color="#A3A3A3" />
 

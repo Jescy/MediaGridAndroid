@@ -22,6 +22,7 @@
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/iv_userhead"
         android:text="@string/hello"
+        android:textColor="@android:color/white"
         android:background="@drawable/chatfrom_bg" />
 
     <TextView

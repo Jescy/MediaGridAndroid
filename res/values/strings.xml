@@ -36,6 +36,7 @@
     <string name="testuserA">John</string>
     <string name="testuserB">Jescy</string>
     <string name="testuserC">McCormick</string>
+    <string name="test_server">192.168.1.109:5984</string>
     <string name="everyone">to: Everyone</string>
     <string name="hello">How are you, John?</string>
     <string name="path">Home>>Documents</string>

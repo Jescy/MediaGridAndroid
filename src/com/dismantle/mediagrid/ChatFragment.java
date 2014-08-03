@@ -100,24 +100,21 @@ public class ChatFragment extends Fragment {
 
 	}
 
-	private String getNameAwesome(String name)
-	{
-		if(name.equals(GlobalUtil.every_one))
-		{
-			return name+getString(R.string.fa_users);
-		}else if(name.equals(mUser.username))
-		{
-			return name+getString(R.string.fa_heart);
-		}else
-			return name+getString(R.string.fa_user);
+	private String getNameAwesome(String name) {
+		if (name.equals(GlobalUtil.every_one)) {
+			return getString(R.string.fa_users) + name;
+		} else if (name.equals(mUser.username)) {
+			return getString(R.string.fa_heart) + name;
+		} else
+			return getString(R.string.fa_user) + name;
 	}
 
 	@SuppressLint("NewApi")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		final FragmentActivity thisActivity = getActivity();	
-	    
+		final FragmentActivity thisActivity = getActivity();
+
 		View rootView = inflater.inflate(R.layout.chat_main, container, false);
 
 		initUser();
@@ -141,13 +138,11 @@ public class ChatFragment extends Fragment {
 			}
 
 		});
-		
-		
-	    
+
 		// choose member button
 		mBtnReceiver = (Button) rootView.findViewById(R.id.btn_receiver);
 		mBtnReceiver.setTypeface(GlobalUtil.getFontAwesome(thisActivity));
-		mBtnReceiver.setText("to:" +getNameAwesome(GlobalUtil.every_one));
+		mBtnReceiver.setText(getNameAwesome(GlobalUtil.every_one));
 		mBtnReceiver.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -206,7 +201,7 @@ public class ChatFragment extends Fragment {
 		case 1:
 			Bundle bundle = data.getExtras();
 			String name = bundle.getString("name");
-			mBtnReceiver.setText("to: " + getNameAwesome(name));
+			mBtnReceiver.setText(getNameAwesome(name));
 			mStrReceiver = name;
 
 			if (!mChatItemsMap.containsKey(mStrReceiver)) {
