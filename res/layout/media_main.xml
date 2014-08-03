@@ -12,13 +12,14 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="#FFFFFF" >
+        android:background="#336699" >
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/path"
             android:id="@+id/txt_path"
+            android:textColor="#FFFFFF"
             android:textSize="18sp" />
     </LinearLayout>
 
@@ -37,8 +38,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/button_send_bg"
-            android:textColor="#76EE00"
+            android:background="@drawable/button_upload_bg"
+            android:textColor="#000000"
             android:text="@string/upload" />
 
         <Button
@@ -46,7 +47,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/button_send_bg"
+            android:background="@drawable/button_upload_bg"
             android:text="@string/mkdir" />
     </LinearLayout>
 
@@ -56,7 +57,7 @@
         android:layout_height="fill_parent"
         android:layout_above="@id/layout_tools"
         android:layout_below="@id/layout_path"
-        android:divider="#AFAFAF"
+        android:divider="#000000"
         android:dividerHeight="1dp" >
     </com.dismantle.mediagrid.RTPullListView>
 

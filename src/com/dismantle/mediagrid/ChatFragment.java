@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -99,11 +100,24 @@ public class ChatFragment extends Fragment {
 
 	}
 
+	private String getNameAwesome(String name)
+	{
+		if(name.equals(GlobalUtil.every_one))
+		{
+			return name+getString(R.string.fa_users);
+		}else if(name.equals(mUser.username))
+		{
+			return name+getString(R.string.fa_heart);
+		}else
+			return name+getString(R.string.fa_user);
+	}
+
 	@SuppressLint("NewApi")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		final FragmentActivity thisActivity = getActivity();
+		final FragmentActivity thisActivity = getActivity();	
+	    
 		View rootView = inflater.inflate(R.layout.chat_main, container, false);
 
 		initUser();
@@ -128,8 +142,12 @@ public class ChatFragment extends Fragment {
 
 		});
 		
+		
+	    
 		// choose member button
 		mBtnReceiver = (Button) rootView.findViewById(R.id.btn_receiver);
+		mBtnReceiver.setTypeface(GlobalUtil.getFontAwesome(thisActivity));
+		mBtnReceiver.setText("to:" +getNameAwesome(GlobalUtil.every_one));
 		mBtnReceiver.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -137,6 +155,7 @@ public class ChatFragment extends Fragment {
 				Intent intent = new Intent(thisActivity,
 						ChooseMemberActivity.class);
 				intent.putExtra("member", mUsers);
+				intent.putExtra("user_name", mUser.username);
 				startActivityForResult(intent, 1);
 			}
 		});
@@ -187,7 +206,7 @@ public class ChatFragment extends Fragment {
 		case 1:
 			Bundle bundle = data.getExtras();
 			String name = bundle.getString("name");
-			mBtnReceiver.setText("to: " + name);
+			mBtnReceiver.setText("to: " + getNameAwesome(name));
 			mStrReceiver = name;
 
 			if (!mChatItemsMap.containsKey(mStrReceiver)) {
@@ -254,7 +273,6 @@ public class ChatFragment extends Fragment {
 				break;
 			case GlobalUtil.MSG_CHAT_LIST:
 				@SuppressWarnings("unchecked")
-				// TODO incoming message
 				List<ChatItem> msgs = (List<ChatItem>) msg.obj;
 				if (!mChatItemsMap.containsKey(GlobalUtil.every_one)) {
 					mChatItemsMap.put(GlobalUtil.every_one,
@@ -460,7 +478,6 @@ public class ChatFragment extends Fragment {
 		if (!mChatItemsMap.containsKey(GlobalUtil.every_one))
 			mChatItemsMap.put(GlobalUtil.every_one, new ArrayList<ChatItem>());
 		for (String msg : mMSGs) {
-			// TODO print message
 			ChatItem chatItem = new ChatItem();
 			chatItem.itemMsg = msg;
 			chatItem.itemType = ChatItem.ITEM_MSG_ALL;

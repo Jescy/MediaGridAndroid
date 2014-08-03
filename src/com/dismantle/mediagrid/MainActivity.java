@@ -79,20 +79,12 @@ public class MainActivity extends ActionBarActivity implements
 			// the TabListener interface, as the callback (listener) for when
 			// this tab is selected.
 			Tab tab = actionBar.newTab();
-
-//			TextView tView = new TextView(this);
-//			tView.setTypeface(GlobalUtil.getFontAwesome(this));
-//			tView.setTextSize(20);
-//			tView.setText(mSectionsPagerAdapter.getPageTitle(i));
-//			tView.setTextColor(getResources().getColor(android.R.color.white));
-			
 			View titleView = LayoutInflater.from(this).inflate(R.layout.fragment_title, null);
 			TextView textView = (TextView)titleView.findViewById(R.id.frag_title);
 			textView.setTypeface(GlobalUtil.getFontAwesome(this));
 			textView.setText(mSectionsPagerAdapter.getPageTitle(i));
 			tab.setCustomView(titleView);
 			tab.setTabListener(this);
-			
 			actionBar.addTab(tab);
 		}
 	}

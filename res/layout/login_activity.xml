@@ -19,14 +19,15 @@
         android:layout_width="300dp"
         android:layout_height="fill_parent"
         android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
         android:orientation="vertical" >
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:layout_marginLeft="40dp"
             android:text="@string/pick_name"
+            android:layout_gravity="left"
             android:textSize="15sp" >
         </TextView>
 
@@ -38,7 +39,6 @@
             <EditText
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="35dp"
                 android:layout_marginRight="10dp"
                 android:id="@+id/txt_username"
                  android:singleLine="true"
@@ -49,8 +49,8 @@
                 android:id="@+id/btn_login"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/button_send_bg"
-                android:textColor="#0000CC"
+                android:background="@drawable/button_login_bg"
+                android:textColor="#FFCC33"
                 android:text="@string/fa_user" />
         </LinearLayout>
 
@@ -69,69 +69,40 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:gravity="center_horizontal"
             android:orientation="horizontal" >
 
             <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
-                android:background="@drawable/button_send_bg"
-                android:focusable="true"
+                style="@style/saved_names_button_style"
                 android:id="@+id/btn_name0"
+                android:layout_marginRight="5dp"
                 android:text="@string/testuserA" />
 
             <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
-                android:background="@drawable/button_send_bg"
+                style="@style/saved_names_button_style"
                 android:focusable="true"
                 android:id="@+id/btn_name1"
+                android:layout_marginLeft="5dp"
                 android:text="@string/testuserB" />
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
-                android:background="@drawable/button_send_bg"
-                android:focusable="true"
-                android:id="@+id/btn_name2"
-                android:text="@string/testuserC" />
         </LinearLayout>
         <LinearLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:gravity="center_horizontal"
             android:orientation="horizontal" >
 
             <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
-                android:background="@drawable/button_send_bg"
-                android:focusable="true"
-                android:id="@+id/btn_name3"
+                style="@style/saved_names_button_style"
+                android:id="@+id/btn_name2"
+                android:layout_marginRight="5dp"
                 android:text="@string/testuserA" />
 
             <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
-                android:background="@drawable/button_send_bg"
-                android:focusable="true"
-                android:id="@+id/btn_name4"
+                style="@style/saved_names_button_style"
+                android:id="@+id/btn_name3"
+                android:layout_marginLeft="5dp"
                 android:text="@string/testuserB" />
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
-                android:background="@drawable/button_send_bg"
-                android:focusable="true"
-                android:id="@+id/btn_name5"
-                android:text="@string/testuserC" />
         </LinearLayout>
 
         <LinearLayout

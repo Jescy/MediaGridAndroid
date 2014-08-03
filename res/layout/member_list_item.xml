@@ -13,6 +13,7 @@
         android:layout_weight="1"
         android:textSize="25sp"
         android:scaleType="fitCenter"
+        android:textColor="#0099CC"
         android:text="@string/fa_user" />
 
     <LinearLayout

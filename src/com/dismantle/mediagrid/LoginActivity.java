@@ -197,13 +197,11 @@ public class LoginActivity extends ActionBarActivity {
 	};
 
 	private void initNames() {
-		mBtnNames = new Button[6];
+		mBtnNames = new Button[4];
 		mBtnNames[0] = (Button) findViewById(R.id.btn_name0);
 		mBtnNames[1] = (Button) findViewById(R.id.btn_name1);
 		mBtnNames[2] = (Button) findViewById(R.id.btn_name2);
 		mBtnNames[3] = (Button) findViewById(R.id.btn_name3);
-		mBtnNames[4] = (Button) findViewById(R.id.btn_name4);
-		mBtnNames[5] = (Button) findViewById(R.id.btn_name5);
 
 		SharedPreferences sp = LoginActivity.this.getSharedPreferences(
 				"SavedNames", MODE_PRIVATE);
@@ -217,8 +215,8 @@ public class LoginActivity extends ActionBarActivity {
 			if (name == "")
 				mBtnNames[i].setVisibility(View.INVISIBLE);
 			else {
-				if (name.length() > 6)
-					name = name.substring(0, 6) + "*";
+				if (name.length() > 9)
+					name = name.substring(0, 9) + "*";
 				mBtnNames[i].setText(name);
 				mBtnNames[i].setVisibility(View.VISIBLE);
 			}
@@ -240,12 +238,6 @@ public class LoginActivity extends ActionBarActivity {
 						break;
 					case R.id.btn_name3:
 						index = 3;
-						break;
-					case R.id.btn_name4:
-						index = 4;
-						break;
-					case R.id.btn_name5:
-						index = 5;
 						break;
 					default:
 						break;

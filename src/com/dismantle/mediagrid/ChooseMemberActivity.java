@@ -25,8 +25,10 @@ public class ChooseMemberActivity extends Activity {
 
 	HashMap<String, Member> mUsers = null;
 
+	private String mUserName = null;
+
 	public ChooseMemberActivity() {
-		
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -37,6 +39,8 @@ public class ChooseMemberActivity extends Activity {
 
 		Intent intent = getIntent();
 		mUsers = (HashMap<String, Member>) (intent.getExtras().get("member"));
+		mUserName = (String) (intent.getExtras().getString("user_name"));
+
 		mPullListView = (RTPullListView) this.findViewById(R.id.member_list);
 
 		mDatalist = new ArrayList<Map<String, Object>>();
@@ -44,8 +48,9 @@ public class ChooseMemberActivity extends Activity {
 		// adapter = new ArrayAdapter<String>(this,
 		// android.R.layout.simple_list_item_1, dataList);
 		mAdapter = new ChooseMemberSimpleAdapter(this, mDatalist,
-				R.layout.member_list_item, new String[] { "member_name" },
-				new int[] { R.id.member_name });
+				R.layout.member_list_item, new String[] { "user_photo",
+						"member_name" }, new int[] { R.id.user_photo,
+						R.id.member_name });
 		// setListAdapter(adapter);
 		mPullListView.setAdapter(mAdapter);
 
@@ -59,8 +64,10 @@ public class ChooseMemberActivity extends Activity {
 				if (id <= -1)
 					return;
 				Intent intent = new Intent();
-				intent.putExtra("name", mDatalist.get(position-1).get("member_name").toString());
-				ChooseMemberActivity.this.setResult(Activity.RESULT_OK,intent);
+				intent.putExtra("name",
+						mDatalist.get(position - 1).get("member_name")
+								.toString());
+				ChooseMemberActivity.this.setResult(Activity.RESULT_OK, intent);
 				ChooseMemberActivity.this.finish();
 			}
 
@@ -75,10 +82,14 @@ public class ChooseMemberActivity extends Activity {
 		Map<String, Object> map = new HashMap<String, Object>();
 		dList.add(map);
 		map.put("member_name", "Everyone");
-		
-		for (String key: mUsers.keySet()) {
-			Member member=mUsers.get(key);
+		map.put("user_photo", getString(R.string.fa_users));
+		for (String key : mUsers.keySet()) {
+			Member member = mUsers.get(key);
 			map = new HashMap<String, Object>();
+			if (member.name.equals(mUserName)) {
+				map.put("user_photo", getString(R.string.fa_heart));
+			}else
+				map.put("user_photo", getString(R.string.fa_user));
 			map.put("member_name", member.name);
 			dList.add(map);
 		}
@@ -86,9 +97,11 @@ public class ChooseMemberActivity extends Activity {
 		mDatalist.addAll(dList);
 	}
 }
+
 class ChooseMemberSimpleAdapter extends SimpleAdapter {
 
 	private Context mContext = null;
+
 	public ChooseMemberSimpleAdapter(Context context,
 			List<? extends Map<String, ?>> data, int resource, String[] from,
 			int[] to) {
@@ -97,8 +110,8 @@ class ChooseMemberSimpleAdapter extends SimpleAdapter {
 	}
 
 	public View getView(int position, View convertView, ViewGroup parent) {
-		View res=super.getView(position, convertView, parent);
-		TextView textView=(TextView)res.findViewById(R.id.user_photo);
+		View res = super.getView(position, convertView, parent);
+		TextView textView = (TextView) res.findViewById(R.id.user_photo);
 		textView.setTypeface(GlobalUtil.getFontAwesome(mContext));
 		return res;
 	}

@@ -267,6 +267,7 @@ public class MediaFragment extends Fragment {
 						map.put("file_name", "..");
 						map.put("type", "DIR");
 						map.put("file_ico", getString(R.string.fa_level_up));
+						map.put("icon_color", "#628EAE");
 						map.put("upload_time", "");
 						map.put("file_url", "");
 						map.put("file_size", "---------");
@@ -289,12 +290,14 @@ public class MediaFragment extends Fragment {
 						if (fileSize.equals("-")) {
 							map.put("file_size", "---------");
 							map.put("file_ico", getString(R.string.fa_folder));
+							map.put("icon_color", "#628EAE");
 							dirs.add(map);
 						} else {
 							map.put("file_size", fileSize + "B");
 							String posix = fileName.substring(fileName.lastIndexOf("."));
 							int iconID = FileTypeIcon.getIcon(posix);
 							map.put("file_ico", getString(iconID));
+							map.put("icon_color", FileTypeIcon.getColor(posix));
 							files.add(map);
 						}
 						
@@ -417,18 +420,23 @@ public class MediaFragment extends Fragment {
 class MediaSimpleAdapter extends SimpleAdapter {
 
 	private Context mContext = null;
+	private List<? extends Map<String, Object>> mDatas=null;
 	public MediaSimpleAdapter(Context context,
-			List<? extends Map<String, ?>> data, int resource, String[] from,
+			List<? extends Map<String, Object>> data, int resource, String[] from,
 			int[] to) {
 		super(context, data, resource, from, to);
+		mDatas = data;
 		mContext = context;
 	}
 
 	public View getView(int position, View convertView, ViewGroup parent) {
+		
+		Map<String, Object> map = mDatas.get(position);
 		View res=super.getView(position, convertView, parent);
 		TextView textView=(TextView)res.findViewById(R.id.file_ico);
 		textView.setTypeface(GlobalUtil.getFontAwesome(mContext));
-		textView.setTextColor(Color.parseColor("#66CD00"));
+		Object color = map.get("icon_color");
+		textView.setTextColor(Color.parseColor(color.toString()));
 		return res;
 	}
 }
