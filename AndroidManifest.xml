@@ -18,6 +18,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.dismantle.mediagrid.LoginActivity"
+            android:screenOrientation="locked"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,10 +28,12 @@
         </activity>
         <activity
             android:name="com.dismantle.mediagrid.ChooseMemberActivity"
+            android:screenOrientation="locked"
             android:label="@string/app_name" >
         </activity>
         <activity
             android:name="com.dismantle.mediagrid.MainActivity"
+            android:screenOrientation="locked"
             android:label="@string/title_activity_media_main" >
         </activity>
     </application>

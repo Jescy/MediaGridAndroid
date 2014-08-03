@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -27,10 +28,13 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import com.dismantle.mediagrid.RTPullListView.OnRefreshListener;
 import com.google.gson.Gson;
 
 /**
@@ -40,10 +44,10 @@ public class ChatFragment extends Fragment {
 
 	private RTPullListView mPullListView = null;
 
-	List<Map<String, Object>> mDatalist = null;
-	Map<String, List<Map<String, Object>>> mDatalists = null;
+	List<ChatItem> mChatItems = null;
+	Map<String, List<ChatItem>> mChatItemsMap = null;
 	// private List<String> dataList;
-	private SimpleAdapter mAdapter = null;
+	private BaseAdapter mAdapter = null;
 	private User mUser = null;
 
 	private HashMap<String, Member> mUsers = new HashMap<String, Member>();
@@ -63,6 +67,8 @@ public class ChatFragment extends Fragment {
 	private Thread mIMThread = null;
 	private Thread mUserThread = null;
 	private UserDoc mUserDoc = null;
+
+	private long mLastTime = 0;
 
 	public ChatFragment() {
 
@@ -93,6 +99,7 @@ public class ChatFragment extends Fragment {
 
 	}
 
+	@SuppressLint("NewApi")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -103,12 +110,10 @@ public class ChatFragment extends Fragment {
 
 		mPullListView = (RTPullListView) rootView.findViewById(R.id.chat_list);
 
-		mDatalist = new ArrayList<Map<String, Object>>();
+		mChatItems = new ArrayList<ChatItem>();
 
-		mAdapter = new SimpleAdapter(thisActivity, mDatalist,
-				R.layout.chat_list_item, new String[] { "chat_from", "chat_to",
-						"chat_time", "chat_msg" }, new int[] { R.id.chat_from,
-						R.id.chat_to, R.id.chat_time, R.id.chat_msg });
+		mAdapter = new ChatMsgViewAdapter(thisActivity, mChatItems);
+
 		// setListAdapter(adapter);
 		mPullListView.setAdapter(mAdapter);
 
@@ -122,7 +127,7 @@ public class ChatFragment extends Fragment {
 			}
 
 		});
-
+		
 		// choose member button
 		mBtnReceiver = (Button) rootView.findViewById(R.id.btn_receiver);
 		mBtnReceiver.setOnClickListener(new OnClickListener() {
@@ -168,7 +173,7 @@ public class ChatFragment extends Fragment {
 			}
 		});
 		mStrReceiver = GlobalUtil.every_one;
-		mDatalists = new HashMap<String, List<Map<String, Object>>>();
+		mChatItemsMap = new HashMap<String, List<ChatItem>>();
 		return rootView;
 	}
 
@@ -185,12 +190,13 @@ public class ChatFragment extends Fragment {
 			mBtnReceiver.setText("to: " + name);
 			mStrReceiver = name;
 
-			if (!mDatalists.containsKey(mStrReceiver)) {
-				mDatalists.put(mStrReceiver, new Vector<Map<String, Object>>());
+			if (!mChatItemsMap.containsKey(mStrReceiver)) {
+				mChatItemsMap.put(mStrReceiver, new ArrayList<ChatItem>());
 			}
 
-			mDatalist.clear();
-			mDatalist.addAll(mDatalists.get(mStrReceiver));
+			mChatItems.clear();
+			mChatItems.add(new ChatItem());
+			mChatItems.addAll(mChatItemsMap.get(mStrReceiver));
 			mAdapter.notifyDataSetChanged();
 			mPullListView.setSelection(mPullListView.getBottom());
 			break;
@@ -248,15 +254,17 @@ public class ChatFragment extends Fragment {
 				break;
 			case GlobalUtil.MSG_CHAT_LIST:
 				@SuppressWarnings("unchecked")
-				List<Map<String, Object>> msgs = (List<Map<String, Object>>) msg.obj;
-				if (!mDatalists.containsKey(GlobalUtil.every_one)) {
-					mDatalists.put(GlobalUtil.every_one,
-							new Vector<Map<String, Object>>());
+				// TODO incoming message
+				List<ChatItem> msgs = (List<ChatItem>) msg.obj;
+				if (!mChatItemsMap.containsKey(GlobalUtil.every_one)) {
+					mChatItemsMap.put(GlobalUtil.every_one,
+							new ArrayList<ChatItem>());
 				}
-				mDatalists.get(GlobalUtil.every_one).addAll(msgs);
+				mChatItemsMap.get(GlobalUtil.every_one).addAll(msgs);
 				if (mStrReceiver.equals(GlobalUtil.every_one)) {
-					mDatalist.clear();
-					mDatalist.addAll(mDatalists.get(mStrReceiver));
+					mChatItems.clear();
+					mChatItems.add(new ChatItem());
+					mChatItems.addAll(mChatItemsMap.get(mStrReceiver));
 					mAdapter.notifyDataSetChanged();
 					mPullListView.setSelection(mPullListView.getBottom());
 				}
@@ -449,20 +457,19 @@ public class ChatFragment extends Fragment {
 
 	private void printMSG() {
 
-		if (!mDatalists.containsKey(GlobalUtil.every_one))
-			mDatalists.put(GlobalUtil.every_one,
-					new Vector<Map<String, Object>>());
+		if (!mChatItemsMap.containsKey(GlobalUtil.every_one))
+			mChatItemsMap.put(GlobalUtil.every_one, new ArrayList<ChatItem>());
 		for (String msg : mMSGs) {
-			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("chat_from", "message");
-			map.put("chat_to", "every one");
-			map.put("chat_time", new Date().toGMTString());
-			map.put("chat_msg", msg);
-			mDatalists.get(GlobalUtil.every_one).add(map);
+			// TODO print message
+			ChatItem chatItem = new ChatItem();
+			chatItem.itemMsg = msg;
+			chatItem.itemType = ChatItem.ITEM_MSG_ALL;
+			mChatItemsMap.get(GlobalUtil.every_one).add(chatItem);
 		}
 		if (mStrReceiver.equals(GlobalUtil.every_one)) {
-			mDatalist.clear();
-			mDatalist.addAll(mDatalists.get(GlobalUtil.every_one));
+			mChatItems.clear();
+			mChatItems.add(new ChatItem());
+			mChatItems.addAll(mChatItemsMap.get(GlobalUtil.every_one));
 			mAdapter.notifyDataSetChanged();
 			mPullListView.setSelection(mPullListView.getBottom());
 		}
@@ -482,28 +489,47 @@ public class ChatFragment extends Fragment {
 			// deal with each message
 			String chat_from = doc.getString("from");
 			String chat_to = doc.getString("to");
-			String chat_time = new java.util.Date(doc.getLong("created_at"))
-					.toGMTString();
+			long chat_time = doc.getLong("created_at");
 			String chat_msg = to.getString("msg");
 
-			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("chat_from", chat_from);
-			map.put("chat_to", chat_to);
-			map.put("chat_time", chat_time);
-			map.put("chat_msg", chat_msg);
+			// Map<String, Object> map = new HashMap<String, Object>();
+			// map.put("chat_from", chat_from);
+			// map.put("chat_to", chat_to);
+			// map.put("chat_time", chat_time);
+			// map.put("chat_msg", chat_msg);
 
 			String msgWith = chat_from;
 			if (chat_from.equals(mUser.username))
 				msgWith = chat_to;
 			// save received message to mDatalists according to chat_from
-			if (!mDatalists.containsKey(msgWith)) {
-				mDatalists.put(msgWith, new Vector<Map<String, Object>>());
+			if (!mChatItemsMap.containsKey(msgWith)) {
+				mChatItemsMap.put(msgWith, new ArrayList<ChatItem>());
 			}
-			mDatalists.get(msgWith).add(map);
-			// if chat_from is the current receiver, then show message
+
+			// if time different is big enough, then show the chat time.
+			long time_diff = chat_time - mLastTime;
+			if (time_diff >= GlobalUtil.CHAT_TIME_INTERVAL) {
+				ChatItem item2 = new ChatItem();
+				item2.itemType = ChatItem.ITEM_MSG_ALL;
+				item2.itemMsg = GlobalUtil.getFormattedDate(new java.util.Date(
+						chat_time));
+				mChatItemsMap.get(msgWith).add(item2);
+				mLastTime = chat_time;
+			}
+
+			// show IM message
+			ChatItem item = new ChatItem();
+			item.chatNick = chat_to;
+			item.itemMsg = chat_msg;
+			item.itemType = chat_from.equals(mUser.username) ? ChatItem.ITEM_MSG_ME
+					: ChatItem.ITEM_MSG_USER;
+			mChatItemsMap.get(msgWith).add(item);
+
+			// if chat_from is the current receiver, then update message list
 			if (msgWith.equals(mStrReceiver)) {
-				mDatalist.clear();
-				mDatalist.addAll(mDatalists.get(msgWith));
+				mChatItems.clear();
+				mChatItems.add(new ChatItem());
+				mChatItems.addAll(mChatItemsMap.get(msgWith));
 				mAdapter.notifyDataSetChanged();
 				mPullListView.setSelection(mPullListView.getBottom());
 			}
@@ -511,6 +537,11 @@ public class ChatFragment extends Fragment {
 
 	}
 
+	/**
+	 * get chat messages(i.e. public message) by messages' first ID and last ID
+	 * 
+	 * @param jsonMessages
+	 */
 	private void getMessages(final JSONObject jsonMessages) {
 		new Thread() {
 
@@ -526,7 +557,7 @@ public class ChatFragment extends Fragment {
 							mUser.username, firstMsg, lastMsg);
 					JSONArray rows = resJson.getJSONArray("rows");
 
-					ArrayList<Map<String, Object>> msgs = new ArrayList<Map<String, Object>>();
+					ArrayList<ChatItem> msgs = new ArrayList<ChatItem>();
 					for (int i = 0; i < rows.length(); i++) {
 						JSONObject jsonObject = rows.getJSONObject(i);
 						JSONObject value = jsonObject.getJSONObject("value");
@@ -534,18 +565,37 @@ public class ChatFragment extends Fragment {
 						JSONObject to = message.getJSONObject(mUser.username);
 
 						// deal with each message
-						String chat_from = value.getString("nick");
-						String chat_to = mUser.username;
-						String chat_time = new java.util.Date(
-								value.getLong("created_at")).toGMTString();
+						String chat_nick = value.getString("nick");
+						long chat_time = value.getLong("created_at");
 						String chat_msg = to.getString("msg");
+						boolean chat_from_me = chat_nick.equals(mUser.username);
+						// Map<String, Object> map = new HashMap<String,
+						// Object>();
+						// map.put("chat_from", chat_from);
+						// map.put("chat_to", chat_to);
+						// map.put("chat_time", chat_time);
+						// map.put("chat_msg", chat_msg);
 
-						Map<String, Object> map = new HashMap<String, Object>();
-						map.put("chat_from", chat_from);
-						map.put("chat_to", chat_to);
-						map.put("chat_time", chat_time);
-						map.put("chat_msg", chat_msg);
-						msgs.add(map);
+						// if time different is big enough, then show the chat
+						// time.
+						long time_diff = chat_time - mLastTime;
+						if (time_diff >= GlobalUtil.CHAT_TIME_INTERVAL) {
+							ChatItem item2 = new ChatItem();
+							item2.itemType = ChatItem.ITEM_MSG_ALL;
+							item2.itemMsg = GlobalUtil
+									.getFormattedDate(new java.util.Date(
+											chat_time));
+							msgs.add(item2);
+							mLastTime = chat_time;
+						}
+
+						// show the chat message
+						ChatItem item = new ChatItem();
+						item.chatNick = chat_nick;
+						item.itemMsg = chat_msg;
+						item.itemType = chat_from_me ? ChatItem.ITEM_MSG_ME
+								: ChatItem.ITEM_MSG_USER;
+						msgs.add(item);
 					}
 					Message msg = new Message();
 					msg.what = GlobalUtil.MSG_CHAT_LIST;
@@ -642,6 +692,7 @@ public class ChatFragment extends Fragment {
 
 	public void switchRoom() {
 		final EditText txtRoom = new EditText(getActivity());
+		txtRoom.setText(mUser.room);
 		new AlertDialog.Builder(getActivity())
 				.setTitle("Switch room")
 				.setView(txtRoom)
@@ -655,7 +706,11 @@ public class ChatFragment extends Fragment {
 									return;
 								mMsgQueue.clear();
 								mMSGs.clear();
-								mDatalist.clear();
+								mChatItemsMap.clear();
+								mChatItems.clear();
+								mUsers.clear();
+								mAdapter.notifyDataSetChanged();
+
 								mChatThread.interrupt();
 								mIMThread.interrupt();
 								mUserThread.interrupt();

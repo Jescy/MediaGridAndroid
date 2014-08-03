@@ -154,16 +154,6 @@ public class MediaFragment extends Fragment {
 			}
 
 		});
-		// pulltorefresh listener
-		mPullListView.setonRefreshListener(new OnRefreshListener() {
-
-			@Override
-			public void onRefresh() {
-
-				// loadData(GlobalUtil.LOAD_SUCCESS,false);
-
-			}
-		});
 
 		mBtnUpload.setOnClickListener(new UploadOnclickListener());
 		mBtnMakeDir.setOnClickListener(new MakeDirOnclickListener());

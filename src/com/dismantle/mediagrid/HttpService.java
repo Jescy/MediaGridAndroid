@@ -34,9 +34,13 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.util.EncodingUtils;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.net.Uri;
+import android.util.Xml.Encoding;
 
 public class HttpService {
 	private String mServerIP = "127.0.0.1";
@@ -179,9 +183,10 @@ public class HttpService {
 		try {
 			httppost.setHeader("Content-Type",
 					"application/x-www-form-urlencoded; charset=UTF-8");
-			httppost.setEntity(new StringEntity(URLEncoder.encode(payload,
-					"UTF-8"))); // execute
-			// post
+			StringEntity stringEntity = new StringEntity(Uri.encode(
+					payload, "UTF-8"));
+			httppost.setEntity(stringEntity);
+			// execute post
 			mHttpResponse = mHttpClient.execute(httppost);
 			String resultString = EntityUtils.toString(mHttpResponse
 					.getEntity());
@@ -241,10 +246,9 @@ public class HttpService {
 			fileExplain
 					.append("Content-Disposition: form-data;name=\"_attachments\";filename=\""
 							+ uploadFile.getName() + "\"\r\n");
-			//MIME type
-			fileExplain
-					.append("Content-Type: ");
-			fileExplain.append(MIMEType.getMIMEType(uploadFile)+"\r\n\r\n");
+			// MIME type
+			fileExplain.append("Content-Type: ");
+			fileExplain.append(MIMEType.getMIMEType(uploadFile) + "\r\n\r\n");
 			arrayOutputStream.write(fileExplain.toString().getBytes());
 
 			byte[] buffer = new byte[1024];

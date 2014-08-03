@@ -2,8 +2,11 @@ package com.dismantle.mediagrid;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import com.dismantle.mediagrid.R.string;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -59,6 +62,8 @@ public class GlobalUtil {
 
 	public static final int HEART_BEAT_INTERVAL = 10000;
 	public static final int RECONNECT_INTERVAL = 20000;
+	
+	public static final long CHAT_TIME_INTERVAL =  60*1000;
 
 	// private static final int SOURCE_SQURE=2;
 	public static String HexEncode(byte[] toencode) {
@@ -136,5 +141,10 @@ public class GlobalUtil {
 			mFontAwesome = Typeface.createFromAsset(context.getAssets(), "fontawesome-webfont.ttf");
 		return mFontAwesome;
 	}
-	
+	//date time formatter
+	public static String getFormattedDate(Date date)
+	{
+//		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("");
+		return date.toLocaleString();
+	}
 }

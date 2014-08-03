@@ -58,7 +58,7 @@
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:divider="@android:color/transparent"
-        android:dividerHeight="20dp"
+        android:dividerHeight="5dp"
         android:scrollbars="none" >
     </com.dismantle.mediagrid.RTPullListView>
 
@@ -72,6 +72,7 @@
         android:layout_marginRight="3dp"
         android:background="@drawable/button_receiver_bg"
         android:text="@string/everyone"
+        android:textColor="#A8A8A8"
         android:textSize="15sp" />
 
 </RelativeLayout>
