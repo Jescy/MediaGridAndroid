@@ -53,6 +53,7 @@ public class GlobalUtil {
 	public static final int MSG_GET_SESSION_FAILED = 21;
 	public static final int MSG_GET_USER_DOC_SUCCESS = 22;
 	public static final int MSG_REGISTER_SUCCESS = 23;
+	public static final int MSG_POLLING_FILE = 24;
 
 	public static final String source_code = "source_code";
 	public static final String data = "data";

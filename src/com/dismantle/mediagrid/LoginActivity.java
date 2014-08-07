@@ -2,10 +2,9 @@ package com.dismantle.mediagrid;
 
 import java.util.Vector;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.ActionBar;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -29,7 +28,7 @@ public class LoginActivity extends ActionBarActivity {
 	private Button[] mBtnNames = null;
 	private Vector<String> names = null;
 	private Vector<String> passwords = null;
-
+	private ProgressDialog progressDialog = null;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -88,7 +87,8 @@ public class LoginActivity extends ActionBarActivity {
 			@Override
 			public void onClick(View arg0) {
 				final EditText txtUserName = (EditText) findViewById(R.id.txt_username);
-
+				progressDialog = ProgressDialog.show(LoginActivity.this, "Login...", "Please wait to login...");
+				progressDialog.setCancelable(true);
 				new Thread() {
 
 					@Override
@@ -116,6 +116,9 @@ public class LoginActivity extends ActionBarActivity {
 
 						} catch (Exception e) {
 							e.printStackTrace(System.err);
+							GlobalUtil.sendMSG(handler,
+									GlobalUtil.MSG_LOAD_FAILED,
+									null);
 						}
 
 					}
@@ -173,7 +176,7 @@ public class LoginActivity extends ActionBarActivity {
 				userName = msg.obj.toString();
 				// get user document
 				getUserDoc(userName);
-
+				progressDialog.dismiss();
 				break;
 			case GlobalUtil.MSG_GET_USER_DOC_SUCCESS:
 				UserDoc userDoc = (UserDoc) msg.obj;
@@ -186,9 +189,11 @@ public class LoginActivity extends ActionBarActivity {
 				break;
 			case GlobalUtil.MSG_REGISTER_NAME_TAKEN:
 				mTvMSG.setText("user name already taken");
+				progressDialog.dismiss();
 				break;
 			case GlobalUtil.MSG_LOAD_FAILED:
-				mTvMSG.setText("Login in failed");
+				mTvMSG.setText("Failed. Check your network or server configure");
+				progressDialog.dismiss();
 				break;
 			default:
 				break;
@@ -290,8 +295,8 @@ public class LoginActivity extends ActionBarActivity {
 					GlobalUtil.sendMSG(handler,
 							GlobalUtil.MSG_GET_SESSION_FAILED, null);
 
-				} catch (JSONException e1) {
-					e1.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 
 			}
@@ -300,6 +305,9 @@ public class LoginActivity extends ActionBarActivity {
 	}
 
 	private void login(final String userName, final String password) {
+		progressDialog = ProgressDialog.show(LoginActivity.this, "Login...", "Please wait to login...");
+		progressDialog.setCancelable(true);
+		
 		new Thread() {
 			@Override
 			public void run() {
@@ -314,8 +322,11 @@ public class LoginActivity extends ActionBarActivity {
 					}
 					GlobalUtil.sendMSG(handler, GlobalUtil.MSG_LOGIN_SUCCESS,
 							userName);
-				} catch (JSONException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
+					GlobalUtil.sendMSG(handler,
+							GlobalUtil.MSG_LOAD_FAILED,
+							null);
 				}
 
 			}

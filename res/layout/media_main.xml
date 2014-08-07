@@ -30,6 +30,8 @@
         android:background="#F3F3F3"
         android:divider="@android:drawable/divider_horizontal_dark"
         android:orientation="horizontal"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:showDividers="middle" >
 
         <Button

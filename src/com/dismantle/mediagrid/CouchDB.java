@@ -27,11 +27,11 @@ public class CouchDB {
 	}
 
 	// DELETE /_session
-	public static JSONObject logout()
-	{
-		JSONObject jsonObject=mHttpService.doDelete("/_session");
+	public static JSONObject logout() {
+		JSONObject jsonObject = mHttpService.doDelete("/_session");
 		return jsonObject;
 	}
+
 	// GET /_session
 	public static JSONObject getSession() {
 		JSONObject user = mHttpService.doGet("/_session");
@@ -43,10 +43,10 @@ public class CouchDB {
 	public static JSONObject getFiles(boolean descending, boolean update_seq,
 			String keys) throws Exception {
 
-		String url = "/media/_design/media/_view/files";
+		String url = "/media/_design/media/_view/files?";
+		url += "descending=" + descending;
+		url += "&update_seq=" + update_seq;
 		JSONObject args = new JSONObject();
-		args.put("descending", descending);
-		args.put("update_seq", update_seq);
 
 		JSONArray jsonKeys = new JSONArray();
 		jsonKeys.put(keys);
@@ -92,7 +92,10 @@ public class CouchDB {
 	}
 
 	public static boolean doDownloadFile(String url, String path) {
-		return mHttpService.doDownloadFile(url, path);
+		int pos = url.lastIndexOf("/");
+		String name = url.substring(pos+1);
+		url = url.substring(0, pos+1);
+		return mHttpService.doDownloadFile(url, name, path);
 	}
 
 	// POST /media/{id}?_attachments={name}&_rev={rev}
@@ -146,7 +149,7 @@ public class CouchDB {
 		String url = "/chat/" + userID;
 		JSONObject args = new JSONObject();
 		args.put("_id", userID);
-		if(rev!=null)
+		if (rev != null)
 			args.put("_rev", rev);
 		args.put("key", key);
 		args.put("rooms", new JSONArray(rooms));
@@ -187,7 +190,7 @@ public class CouchDB {
 
 	// GET /_changes
 	// for IM message
-	//http://127.0.0.1:5984/chat/_changes?heartbeat=10000&filter=chat%2Fim&include_docs=true&feed=longpoll&since=407
+	// http://127.0.0.1:5984/chat/_changes?heartbeat=10000&filter=chat%2Fim&include_docs=true&feed=longpoll&since=407
 	public static JSONObject longPollingIM(int since) {
 		String url = "/chat/_changes?";
 		url += "heartbeat=" + GlobalUtil.HEART_BEAT_INTERVAL;
@@ -207,6 +210,17 @@ public class CouchDB {
 		url += "&filter=" + "chat/user";
 		url += "&include_docs=true";
 		url += "&room=" + room;
+		url += "&feed=" + "longpoll";
+		url += "&since=" + since;
+		JSONObject resJson = mHttpService.doGetPolling(url);
+		return resJson;
+	}
+
+	// GET /_changes
+	// for file list
+	public static JSONObject longPollingFile(int since) {
+		String url = "/media/_changes?";
+		url += "heartbeat=" + GlobalUtil.HEART_BEAT_INTERVAL;
 		url += "&feed=" + "longpoll";
 		url += "&since=" + since;
 		JSONObject resJson = mHttpService.doGetPolling(url);

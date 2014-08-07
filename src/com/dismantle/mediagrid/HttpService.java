@@ -183,8 +183,8 @@ public class HttpService {
 		try {
 			httppost.setHeader("Content-Type",
 					"application/x-www-form-urlencoded; charset=UTF-8");
-			StringEntity stringEntity = new StringEntity(Uri.encode(
-					payload, "UTF-8"));
+			StringEntity stringEntity = new StringEntity(Uri.encode(payload,
+					"UTF-8"));
 			httppost.setEntity(stringEntity);
 			// execute post
 			mHttpResponse = mHttpClient.execute(httppost);
@@ -296,14 +296,14 @@ public class HttpService {
 		return jsonObject;
 	}
 
-	public boolean doDownloadFile(String url, String path) {
+	public boolean doDownloadFile(String urlPath, String name, String path) {
 		try {
 
 			File file = new File(path);
 			if (file.exists()) {
 				file.delete();
 			}
-			URL urlURL = new URL(mBaseURL + url);
+			URL urlURL = new URL(mBaseURL + urlPath + Uri.encode(name));
 			URLConnection con = urlURL.openConnection();
 
 			InputStream is = con.getInputStream();

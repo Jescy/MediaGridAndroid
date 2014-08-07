@@ -1,5 +1,6 @@
 package com.dismantle.mediagrid;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -57,6 +59,9 @@ public class MediaFragment extends Fragment {
 	Dialog mUploadFileDialog = null;
 	Dialog mDownFileDialog = null;
 
+	private ProgressDialog mProgressDialog = null;
+	private int mUpdateSeq = 0;
+
 	public MediaFragment() {
 	}
 
@@ -69,14 +74,14 @@ public class MediaFragment extends Fragment {
 		mTxtPath = (TextView) rootView.findViewById(R.id.txt_path);
 		mBtnMakeDir = (Button) rootView.findViewById(R.id.btn_mkdir);
 		mBtnMakeDir.setTypeface(GlobalUtil.getFontAwesome(thisActivity));
-		mBtnMakeDir.setText(getResources().getString(R.string.fa_level_down)+mBtnMakeDir.getText());
-		
+		mBtnMakeDir.setText(getResources().getString(R.string.fa_level_down)
+				+ mBtnMakeDir.getText());
+
 		mBtnUpload = (Button) rootView.findViewById(R.id.btn_upload);
 		mBtnUpload.setTypeface(GlobalUtil.getFontAwesome(thisActivity));
-		mBtnUpload.setText(getResources().getString(R.string.fa_cloud_upload)+mBtnUpload.getText());
+		mBtnUpload.setText(getResources().getString(R.string.fa_cloud_upload)
+				+ mBtnUpload.getText());
 		mDatalist = new ArrayList<Map<String, Object>>();
-		
-		
 
 		mAdapter = new MediaSimpleAdapter(thisActivity, mDatalist,
 				R.layout.media_list_item, new String[] { "file_ico",
@@ -105,27 +110,39 @@ public class MediaFragment extends Fragment {
 				Map<String, Object> item = mDatalist.get(realID);
 				String type = item.get("type").toString();
 				final String fileurl = item.get("file_url").toString();
-				final String filename=item.get("file_name").toString();
+				final String filename = item.get("file_name").toString();
 				if (type.equals("DIR")) {
 					mCurrentKeys.add(fileurl);
 					loadFiles();
 				} else if (type.equals("FILE")) {
-					
-					mDownFileDialog = OpenFileDialog.createDialog(getActivity(),
-							"choose a directory", new CallbackBundle() {
+
+					mDownFileDialog = OpenFileDialog.createDialog(
+							getActivity(), "choose a directory",
+							new CallbackBundle() {
 
 								@Override
 								public void callback(Bundle bundle) {
 									mDownFileDialog.dismiss();
-									final String path = bundle.getString("path");
+									mProgressDialog = ProgressDialog.show(
+											MediaFragment.this.getActivity(),
+											"Downloading...",
+											"Please wait for download");
+									final String path = bundle
+											.getString("path");
 
 									new Thread() {
 
 										@Override
 										public void run() {
 											try {
-												boolean resDownload=false;
-												resDownload = CouchDB.doDownloadFile("/media/"+fileurl, path+"/"+filename);
+												boolean resDownload = false;
+												resDownload = CouchDB
+														.doDownloadFile(
+																"/media/"
+																		+ fileurl,
+																path
+																		+ "/"
+																		+ filename);
 												if (resDownload)
 													myHandler
 															.sendEmptyMessage(GlobalUtil.MSG_DOWNLOAD_SUCCESS);
@@ -148,8 +165,8 @@ public class MediaFragment extends Fragment {
 							.getWindow().getAttributes();
 					layoutParams.height = LayoutParams.MATCH_PARENT;
 					mDownFileDialog.getWindow().setAttributes(layoutParams);
-					
-					//HttpService.getInstance().doDownloadFile(fileurl, path)
+
+					// HttpService.getInstance().doDownloadFile(fileurl, path)
 				}
 			}
 
@@ -204,6 +221,8 @@ public class MediaFragment extends Fragment {
 			@SuppressWarnings("unchecked")
 			ArrayList<Map<String, Object>> files = (ArrayList<Map<String, Object>>) msg
 					.getData().getSerializable("files");
+			if (mProgressDialog != null && mProgressDialog.isShowing())
+				mProgressDialog.dismiss();
 			switch (msg.what) {
 			case GlobalUtil.MSG_LOAD_SUCCESS:
 				mDatalist.clear();
@@ -212,6 +231,11 @@ public class MediaFragment extends Fragment {
 				mAdapter.notifyDataSetChanged();
 				mPullListView.onRefreshComplete();
 				mPullListView.setSelectionAfterHeaderView();
+
+				longPollingFile(mUpdateSeq);
+				break;
+			case GlobalUtil.MSG_POLLING_FILE:
+				loadFiles();
 				break;
 			case GlobalUtil.MSG_CREATE_DIR_SUCCESS:
 				loadFiles();
@@ -226,10 +250,12 @@ public class MediaFragment extends Fragment {
 					Toast.makeText(getActivity(),
 							getResources().getString(R.string.upload_success),
 							Toast.LENGTH_SHORT).show();
+
 				break;
 			case GlobalUtil.MSG_DOWNLOAD_SUCCESS:
 				if (isAdded())
-					Toast.makeText(getActivity(),
+					Toast.makeText(
+							getActivity(),
 							getResources().getString(R.string.download_success),
 							Toast.LENGTH_SHORT).show();
 				break;
@@ -255,7 +281,11 @@ public class MediaFragment extends Fragment {
 				JSONObject jsonObject = null;
 				try {
 					jsonObject = CouchDB.getFiles(true, true, key);
-
+					if (jsonObject == null || jsonObject.has("error")) {
+						myHandler.sendEmptyMessage(GlobalUtil.MSG_LOAD_FAILED);
+						return;
+					}
+					mUpdateSeq = jsonObject.getInt("update_seq");
 					JSONArray jsonArray = jsonObject.getJSONArray("rows");
 					ArrayList<Map<String, Object>> files = new ArrayList<Map<String, Object>>();
 					ArrayList<Map<String, Object>> dirs = new ArrayList<Map<String, Object>>();
@@ -286,6 +316,7 @@ public class MediaFragment extends Fragment {
 						String fileSize = jsonValue.getString("size");
 						map.put("type", jsonValue.getString("type"));
 						map.put("upload_time", jsonValue.getString("time"));
+
 						map.put("file_url", jsonValue.getString("fileurl"));
 						if (fileSize.equals("-")) {
 							map.put("file_size", "---------");
@@ -294,13 +325,14 @@ public class MediaFragment extends Fragment {
 							dirs.add(map);
 						} else {
 							map.put("file_size", fileSize + "B");
-							String posix = fileName.substring(fileName.lastIndexOf("."));
+							String posix = fileName.substring(fileName
+									.lastIndexOf("."));
 							int iconID = FileTypeIcon.getIcon(posix);
 							map.put("file_ico", getString(iconID));
 							map.put("icon_color", FileTypeIcon.getColor(posix));
 							files.add(map);
 						}
-						
+
 					}
 					Message message = new Message();
 					Bundle bundle = new Bundle();
@@ -309,6 +341,7 @@ public class MediaFragment extends Fragment {
 					message.setData(bundle);
 					message.what = GlobalUtil.MSG_LOAD_SUCCESS;
 					myHandler.sendMessage(message);
+
 				} catch (Exception e) {
 					e.printStackTrace(System.err);
 					myHandler.sendEmptyMessage(GlobalUtil.MSG_LOAD_FAILED);
@@ -371,13 +404,15 @@ public class MediaFragment extends Fragment {
 
 		@Override
 		public void onClick(View arg0) {
-			
 
 			mUploadFileDialog = OpenFileDialog.createDialog(getActivity(),
 					"choose a file", new CallbackBundle() {
 
 						@Override
 						public void callback(Bundle bundle) {
+							mProgressDialog = ProgressDialog.show(
+									MediaFragment.this.getActivity(),
+									"Uploading...", "Please wait for uploading");
 							mUploadFileDialog.dismiss();
 							final String path = bundle.getString("path");
 
@@ -416,24 +451,41 @@ public class MediaFragment extends Fragment {
 			mUploadFileDialog.getWindow().setAttributes(layoutParams);
 		}
 	}
+
+	private void longPollingFile(final int seq) {
+		new Thread() {
+
+			@Override
+			public void run() {
+				JSONObject resJson = CouchDB.longPollingFile(seq);
+				Message msg = new Message();
+				msg.what = GlobalUtil.MSG_POLLING_FILE;
+				msg.obj = resJson;
+				myHandler.sendMessage(msg);
+			}
+
+		}.start();
+	}
 }
+
 class MediaSimpleAdapter extends SimpleAdapter {
 
 	private Context mContext = null;
-	private List<? extends Map<String, Object>> mDatas=null;
+	private List<? extends Map<String, Object>> mDatas = null;
+
 	public MediaSimpleAdapter(Context context,
-			List<? extends Map<String, Object>> data, int resource, String[] from,
-			int[] to) {
+			List<? extends Map<String, Object>> data, int resource,
+			String[] from, int[] to) {
 		super(context, data, resource, from, to);
 		mDatas = data;
 		mContext = context;
 	}
 
 	public View getView(int position, View convertView, ViewGroup parent) {
-		
+
 		Map<String, Object> map = mDatas.get(position);
-		View res=super.getView(position, convertView, parent);
-		TextView textView=(TextView)res.findViewById(R.id.file_ico);
+		View res = super.getView(position, convertView, parent);
+		TextView textView = (TextView) res.findViewById(R.id.file_ico);
 		textView.setTypeface(GlobalUtil.getFontAwesome(mContext));
 		Object color = map.get("icon_color");
 		textView.setTextColor(Color.parseColor(color.toString()));
