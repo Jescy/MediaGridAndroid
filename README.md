@@ -3,7 +3,8 @@ MediaGridAndroid
 
 Android client for MediaGrid.
 Prerequisite:
-To use MediaGridAndroid, you have to install MediaGrid-no-crypto from https://github.com/dismantl/MediaGrid/tree/no-crypto on a computer. Suppose computer's IP and port is 192.168.1.100:5984
+To use MediaGridAndroid, you have to install MediaGrid-no-crypto from https://github.com/dismantl/MediaGrid/tree/no-crypto on a computer. (Suppose computer's IP and port is 192.168.1.100:5984)
+
 Then, install the Android Client, you can install from compiled APK or build the source code yourself.
 Install from APK
 ================
