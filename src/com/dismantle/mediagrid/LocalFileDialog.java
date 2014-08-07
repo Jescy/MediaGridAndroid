@@ -3,6 +3,8 @@ package com.dismantle.mediagrid;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,7 @@ import java.util.Map;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -20,10 +23,11 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class OpenFileDialog {
+public class LocalFileDialog {
 	public static String tag = "OpenFileDialog";
 	static final public String mPathRoot = Environment
 			.getExternalStorageDirectory().getPath();
@@ -51,22 +55,15 @@ public class OpenFileDialog {
 	 */
 	public static Dialog createDialog(Context context, String title,
 			final CallbackBundle callback, String suffix, boolean selDirectory) {
-		Map<String, Integer> images = new HashMap<String, Integer>();
-
-		images.put(OpenFileDialog.mPathRoot, R.drawable.folder_ico); 
-		images.put(OpenFileDialog.mPathParent, R.drawable.folder_ico);
-		images.put(OpenFileDialog.mPathFolder, R.drawable.folder_ico);
-		images.put("wav", R.drawable.file_ico); 
-		images.put(OpenFileDialog.mPathEmpty, R.drawable.file_ico);
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		final FileSelectView fileSelectView = new FileSelectView(context,
-				callback, suffix, selDirectory, images);
+				callback, suffix, selDirectory);
 
 		if (selDirectory) {
 			RelativeLayout relativeLayout = new RelativeLayout(context);
 			Button btnOK = new Button(context);
 			btnOK.setText("Select this directory");
-			btnOK.setBackgroundResource(R.drawable.button_send_bg);
+			btnOK.setBackgroundResource(R.drawable.button_basic_bg);
 			btnOK.setId(12345678);
 			btnOK.setOnClickListener(new OnClickListener() {
 
@@ -87,7 +84,7 @@ public class OpenFileDialog {
 			RelativeLayout.LayoutParams lstLayoutParams = new RelativeLayout.LayoutParams(
 					ViewGroup.LayoutParams.MATCH_PARENT,
 					ViewGroup.LayoutParams.MATCH_PARENT);
-			int id = btnOK.getId();
+
 			lstLayoutParams.addRule(RelativeLayout.ABOVE, btnOK.getId());
 			relativeLayout.addView(fileSelectView, lstLayoutParams);
 			builder.setView(relativeLayout);
@@ -109,14 +106,12 @@ public class OpenFileDialog {
 
 		private String mSuffix = null;
 
-		private Map<String, Integer> mImagemap = null;
 		private Context mContext;
 		private boolean mSelDirecotry;
 
 		public FileSelectView(Context context, CallbackBundle callback,
-				String suffix, boolean selDirecotry, Map<String, Integer> images) {
+				String suffix, boolean selDirecotry) {
 			super(context);
-			this.mImagemap = images;
 			this.mSuffix = suffix == null ? "" : suffix.toLowerCase();
 			this.mCallback = callback;
 			this.mContext = context;
@@ -138,23 +133,21 @@ public class OpenFileDialog {
 			}
 		}
 
-		private int getImageId(String s) {
-			if (mImagemap == null) {
-				return 0;
-			} else if (mImagemap.containsKey(s)) {
-				return mImagemap.get(s);
-			} else if (mImagemap.containsKey(mPathEmpty)) {
-				return mImagemap.get(mPathEmpty);
-			} else {
-				return 0;
-			}
-		}
-
 		private int refreshFileList() {
 			// refresh file list
 			File[] files = null;
 			try {
 				files = new File(mPath).listFiles();
+				Arrays.sort(files, new Comparator<File>() {
+
+					@Override
+					public int compare(File arg0, File arg1) {
+						String name0 = arg0.getName();
+						String name1 = arg1.getName();
+						return name0.compareTo(name1);
+					}
+
+				});
 			} catch (Exception e) {
 				files = null;
 			}
@@ -174,28 +167,29 @@ public class OpenFileDialog {
 			ArrayList<Map<String, Object>> lfolders = new ArrayList<Map<String, Object>>();
 			ArrayList<Map<String, Object>> lfiles = new ArrayList<Map<String, Object>>();
 
-			if (!this.mPath.equals(mPathRoot)) {
-				// add root directory, and back to parent direcotry
-				Map<String, Object> map = new HashMap<String, Object>();
-				map.put("name", mPathRoot);
-				map.put("path", mPathRoot);
-				map.put("img", getImageId(mPathRoot));
-				mList.add(map);
+			// add root directory, and back to parent direcotry
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("name", mPathDefault);
+			map.put("path", mPathDefault);
+			map.put("img", mContext.getString(R.string.fa_folder));
+			map.put("icon_color", "#628EAE");
+			mList.add(map);
 
-				map = new HashMap<String, Object>();
-				map.put("name", mPathParent);
-				map.put("path", mPath);
-				map.put("img", getImageId(mPathParent));
-				mList.add(map);
-			}
+			map = new HashMap<String, Object>();
+			map.put("name", mPathParent);
+			map.put("path", mPath);
+			map.put("img", mContext.getString(R.string.fa_level_up));
+			map.put("icon_color", "#628EAE");
+			mList.add(map);
 
 			for (File file : files) {
 				if (file.isDirectory() && file.listFiles() != null) {
 					// add folders
-					Map<String, Object> map = new HashMap<String, Object>();
+					map = new HashMap<String, Object>();
 					map.put("name", file.getName());
 					map.put("path", file.getPath());
-					map.put("img", getImageId(mPathFolder));
+					map.put("img", mContext.getString(R.string.fa_folder));
+					map.put("icon_color", "#628EAE");
 					lfolders.add(map);
 				} else if (file.isFile()) {
 					// add files
@@ -204,10 +198,18 @@ public class OpenFileDialog {
 							|| mSuffix.length() == 0
 							|| (sf.length() > 0 && mSuffix.indexOf("." + sf
 									+ ";") >= 0)) {
-						Map<String, Object> map = new HashMap<String, Object>();
-						map.put("name", file.getName());
+						map = new HashMap<String, Object>();
+
 						map.put("path", file.getPath());
-						map.put("img", getImageId(sf));
+						String fileName = file.getName();
+						map.put("name", fileName);
+						int pos = fileName.lastIndexOf(".");
+						if (pos <= 0)
+							continue;
+						String posix = fileName.substring(pos);
+						map.put("img",
+								mContext.getString(FileTypeIcon.getIcon(posix)));
+						map.put("icon_color", FileTypeIcon.getColor(posix));
 						lfiles.add(map);
 					}
 				}
@@ -217,14 +219,15 @@ public class OpenFileDialog {
 			if (!mSelDirecotry)
 				mList.addAll(lfiles); // then add files
 
-			SimpleAdapter adapter = new SimpleAdapter(
-					getContext(),
-					mList,
-					R.layout.file_dialog_item,
-					new String[] { "img", "name", "path" },
-					new int[] { R.id.filedialogitem_img,
-							R.id.filedialogitem_name, R.id.filedialogitem_path });
+			setDivider(mContext.getResources().getDrawable(
+					android.R.color.black));
+			setDividerHeight(1);
+			SimpleAdapter adapter = new LocalFileAdatper(getContext(), mList,
+					R.layout.file_dialog_item, new String[] { "img", "name" },
+					new int[] { R.id.filedialogitem_icon,
+							R.id.filedialogitem_name });
 			this.setAdapter(adapter);
+
 			return files.length;
 		}
 
@@ -232,10 +235,9 @@ public class OpenFileDialog {
 		public void onItemClick(AdapterView<?> parent, View v, int position,
 				long id) {
 
-			
 			String pt = (String) mList.get(position).get("path");
 			String fn = (String) mList.get(position).get("name");
-			if (fn.equals(mPathRoot) || fn.equals(mPathParent)) {
+			if (fn.equals(mPathDefault) || fn.equals(mPathParent)) {
 				// if root or parent directory
 				File fl = new File(pt);
 				String ppt = fl.getParent();
@@ -244,10 +246,10 @@ public class OpenFileDialog {
 					mPath = ppt;
 				} else {
 					// back to root
-					mPath = mPathRoot;
+					mPath = mPathDefault;
 				}
 			} else {
-				
+
 				File fl = new File(pt);
 				if (fl.isFile()) {
 					if (mSelDirecotry)
@@ -260,7 +262,7 @@ public class OpenFileDialog {
 					this.mCallback.callback(bundle);
 					return;
 				} else if (fl.isDirectory()) {
-					// if directory 
+					// if directory
 					// go to the direcotry
 					mPath = pt;
 				}
@@ -268,4 +270,30 @@ public class OpenFileDialog {
 			this.refreshFileList();
 		}
 	}
+}
+
+class LocalFileAdatper extends SimpleAdapter {
+
+	private Context mContext = null;
+	List<Map<String, Object>> mDatas = null;
+
+	public LocalFileAdatper(Context context, List<Map<String, Object>> data,
+			int resource, String[] from, int[] to) {
+		super(context, data, resource, from, to);
+		mContext = context;
+		mDatas = data;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		Map<String, Object> map = mDatas.get(position);
+		View res = super.getView(position, convertView, parent);
+		TextView textView = (TextView) res
+				.findViewById(R.id.filedialogitem_icon);
+		textView.setTypeface(GlobalUtil.getFontAwesome(mContext));
+		Object color = map.get("icon_color");
+		textView.setTextColor(Color.parseColor(color.toString()));
+		return res;
+	}
+
 }

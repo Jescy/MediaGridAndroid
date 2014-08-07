@@ -116,7 +116,7 @@ public class MediaFragment extends Fragment {
 					loadFiles();
 				} else if (type.equals("FILE")) {
 
-					mDownFileDialog = OpenFileDialog.createDialog(
+					mDownFileDialog = LocalFileDialog.createDialog(
 							getActivity(), "choose a directory",
 							new CallbackBundle() {
 
@@ -405,7 +405,7 @@ public class MediaFragment extends Fragment {
 		@Override
 		public void onClick(View arg0) {
 
-			mUploadFileDialog = OpenFileDialog.createDialog(getActivity(),
+			mUploadFileDialog = LocalFileDialog.createDialog(getActivity(),
 					"choose a file", new CallbackBundle() {
 
 						@Override
