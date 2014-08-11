@@ -1,17 +1,31 @@
 package com.dismantle.mediagrid;
 
+import android.annotation.SuppressLint;
 import java.io.File;
-
+/**
+ * return the MIME type of the file by a file's suffix
+ *@author Jescy
+ **/
+@SuppressLint("DefaultLocale")
 public class MIMEType {
-	public static String getMIMEType(String posix) {
-		posix = posix.toLowerCase();
+	/**
+	 * get MIME type by suffix
+	 * @param suffix suffix of file
+	 **/
+	@SuppressLint("DefaultLocale")
+	public static String getMIMEType(String suffix) {
+		suffix = suffix.toLowerCase();
 		for (int i = 0; i < MIME_MapTable.length; i++) {
-			if (posix.equals(MIME_MapTable[i][0]))
+			if (suffix.equals(MIME_MapTable[i][0]))
 				return MIME_MapTable[i][1];
 		}
 		return "*/*";
 	}
-
+	/**
+	 * get MIME type by file
+	 * @param file file
+	 **/
+	@SuppressLint("DefaultLocale")
 	public static String getMIMEType(File file) {
 		String fileName = file.getName();
 
@@ -23,7 +37,9 @@ public class MIMEType {
 		
 		return getMIMEType(posix);
 	}
-
+	/**
+	 *MIME map table, from suffix to its MIME type
+	 */
 	private static final String[][] MIME_MapTable = { { ".3gp", "video/3gpp" },
 			{ ".apk", "application/vnd.android.package-archive" },
 			{ ".asf", "video/x-ms-asf" }, { ".avi", "video/x-msvideo" },

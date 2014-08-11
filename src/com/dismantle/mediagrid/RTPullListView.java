@@ -20,9 +20,15 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-public class RTPullListView extends ListView implements OnScrollListener {  
-	private static final String TAG = "RTPullListView";
-
+/**
+ * Pull to refresh list view. It's used in {@link ChatFragment} to show chat
+ * list items, in {@link MediaFragment} to show media list items, in
+ * {@link ChooseRecipientActivity} to show member list.
+ * 
+ * @author Jescy
+ * 
+ */
+public class RTPullListView extends ListView implements OnScrollListener {
 	private final static int RELEASE_To_REFRESH = 0;
 	private final static int PULL_To_REFRESH = 1;
 	private final static int REFRESHING = 2;
@@ -42,7 +48,6 @@ public class RTPullListView extends ListView implements OnScrollListener {
 
 	private RotateAnimation mAnimation;
 	private RotateAnimation mReverseAnimation;
-
 
 	private boolean mIsRecored;
 
@@ -69,14 +74,18 @@ public class RTPullListView extends ListView implements OnScrollListener {
 		super(context, attrs);
 		init(context);
 	}
-	
+
 	private void init(Context context) {
 		mInflater = LayoutInflater.from(context);
-		mHeadView = (LinearLayout) mInflater.inflate(R.layout.pulllistview_header, null);
-		mImageViewArrow = (ImageView) mHeadView.findViewById(R.id.head_arrowImageView);
-		mProgressBar = (ProgressBar) mHeadView.findViewById(R.id.head_progressBar);
+		mHeadView = (LinearLayout) mInflater.inflate(
+				R.layout.pulllistview_header, null);
+		mImageViewArrow = (ImageView) mHeadView
+				.findViewById(R.id.head_arrowImageView);
+		mProgressBar = (ProgressBar) mHeadView
+				.findViewById(R.id.head_progressBar);
 		mTVTips = (TextView) mHeadView.findViewById(R.id.head_tipsTextView);
-		mTVlastUpdated = (TextView) mHeadView.findViewById(R.id.head_lastUpdatedTextView);
+		mTVlastUpdated = (TextView) mHeadView
+				.findViewById(R.id.head_lastUpdatedTextView);
 
 		measureView(mHeadView);
 		mHeadContentHeight = mHeadView.getMeasuredHeight();
@@ -104,25 +113,25 @@ public class RTPullListView extends ListView implements OnScrollListener {
 		mIsRefreshable = false;
 		mIsPush = true;
 	}
-	
+
 	public void onScroll(AbsListView arg0, int firstVisiableItem, int arg2,
 			int arg3) {
 		mFirstItemIndex = firstVisiableItem;
-		mVisibleLastIndex = firstVisiableItem + arg2 - 1; 
+		mVisibleLastIndex = firstVisiableItem + arg2 - 1;
 		mVisibleItemCount = arg2;
-		if(mFirstItemIndex == 1 && !mIsPush){
+		if (mFirstItemIndex == 1 && !mIsPush) {
 			setSelection(0);
 		}
 	}
-	
-	public void setSelectionfoot(){
+
+	public void setSelectionfoot() {
 		this.setSelection(mVisibleLastIndex - mVisibleItemCount + 1);
 	}
 
 	public void onScrollStateChanged(AbsListView arg0, int arg1) {
-		
+
 	}
-	
+
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 
@@ -185,7 +194,7 @@ public class RTPullListView extends ListView implements OnScrollListener {
 							changeHeaderViewByState();
 
 						}
-						
+
 						else {
 
 						}
@@ -195,7 +204,7 @@ public class RTPullListView extends ListView implements OnScrollListener {
 
 						setSelection(0);
 
-						//  enough to show RELEASE_TO_REFRESH
+						// enough to show RELEASE_TO_REFRESH
 						if ((tempY - mStartY) / RATIO >= mHeadContentHeight) {
 							mState = RELEASE_To_REFRESH;
 							mIsBack = true;
@@ -239,7 +248,7 @@ public class RTPullListView extends ListView implements OnScrollListener {
 		return super.onTouchEvent(event);
 	}
 
-	//called to change the interface when state changes
+	// called to change the interface when state changes
 	private void changeHeaderViewByState() {
 		switch (mState) {
 		case RELEASE_To_REFRESH:
@@ -251,7 +260,8 @@ public class RTPullListView extends ListView implements OnScrollListener {
 			mImageViewArrow.clearAnimation();
 			mImageViewArrow.startAnimation(mAnimation);
 
-			mTVTips.setText(getResources().getString(R.string.release_to_refresh));
+			mTVTips.setText(getResources().getString(
+					R.string.release_to_refresh));
 			break;
 		case PULL_To_REFRESH:
 			mProgressBar.setVisibility(View.GONE);
@@ -265,9 +275,11 @@ public class RTPullListView extends ListView implements OnScrollListener {
 				mImageViewArrow.clearAnimation();
 				mImageViewArrow.startAnimation(mReverseAnimation);
 
-				mTVTips.setText(getResources().getString(R.string.pull_to_refresh));
+				mTVTips.setText(getResources().getString(
+						R.string.pull_to_refresh));
 			} else {
-				mTVTips.setText(getResources().getString(R.string.pull_to_refresh));
+				mTVTips.setText(getResources().getString(
+						R.string.pull_to_refresh));
 			}
 			break;
 
@@ -306,8 +318,10 @@ public class RTPullListView extends ListView implements OnScrollListener {
 
 	public void onRefreshComplete() {
 		mState = DONE;
-		CharSequence dateTime = DateFormat.format(getResources().getString(R.string.date_format), new Date());
-		mTVlastUpdated.setText(getResources().getString(R.string.updating) + dateTime);
+		CharSequence dateTime = DateFormat.format(
+				getResources().getString(R.string.date_format), new Date());
+		mTVlastUpdated.setText(getResources().getString(R.string.updating)
+				+ dateTime);
 		changeHeaderViewByState();
 		invalidateViews();
 		setSelection(0);
@@ -318,13 +332,12 @@ public class RTPullListView extends ListView implements OnScrollListener {
 			mRefreshListener.onRefresh();
 		}
 	}
-	
-	public void clickToRefresh(){
+
+	public void clickToRefresh() {
 		mState = REFRESHING;
 		changeHeaderViewByState();
 	}
-	
-	
+
 	private void measureView(View child) {
 		ViewGroup.LayoutParams p = child.getLayoutParams();
 		if (p == null) {
@@ -344,8 +357,10 @@ public class RTPullListView extends ListView implements OnScrollListener {
 		child.measure(childWidthSpec, childHeightSpec);
 	}
 
+	@SuppressWarnings("deprecation")
 	public void setAdapter(BaseAdapter adapter) {
-		mTVlastUpdated.setText(getResources().getString(R.string.updating) + new Date().toLocaleString());
+		mTVlastUpdated.setText(getResources().getString(R.string.updating)
+				+ new Date().toLocaleString());
 		super.setAdapter(adapter);
 	}
-}  
+}

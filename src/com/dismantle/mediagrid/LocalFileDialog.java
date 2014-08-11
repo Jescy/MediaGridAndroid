@@ -1,4 +1,3 @@
-// filename: OpenFileDialog.java
 package com.dismantle.mediagrid;
 
 import java.io.File;
@@ -9,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
+@SuppressLint("DefaultLocale")
 public class LocalFileDialog {
 	public static String tag = "OpenFileDialog";
 	static final public String mPathRoot = Environment
@@ -58,7 +59,7 @@ public class LocalFileDialog {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		final FileSelectView fileSelectView = new FileSelectView(context,
 				callback, suffix, selDirectory);
-
+		// if directory, then show the "Select this directory" button
 		if (selDirectory) {
 			RelativeLayout relativeLayout = new RelativeLayout(context);
 			Button btnOK = new Button(context);
@@ -98,17 +99,39 @@ public class LocalFileDialog {
 		return dialog;
 	}
 
+	/**
+	 * File select list view
+	 * 
+	 * @author Jescy
+	 * 
+	 */
 	static class FileSelectView extends ListView implements OnItemClickListener {
-
+		/**
+		 * call back function
+		 */
 		private CallbackBundle mCallback = null;
+		/**
+		 * current path
+		 */
 		private String mPath = mPathDefault;
+		/**
+		 * list of files
+		 */
 		private List<Map<String, Object>> mList = null;
-
+		/**
+		 * suffix for filter
+		 */
 		private String mSuffix = null;
-
+		/**
+		 * context
+		 */
 		private Context mContext;
+		/**
+		 * if only shows directory
+		 */
 		private boolean mSelDirecotry;
 
+		@SuppressLint("DefaultLocale")
 		public FileSelectView(Context context, CallbackBundle callback,
 				String suffix, boolean selDirecotry) {
 			super(context);
@@ -124,6 +147,12 @@ public class LocalFileDialog {
 			refreshFileList();
 		}
 
+		/**
+		 * get suffix of a file
+		 * 
+		 * @param filename
+		 * @return
+		 */
 		private String getSuffix(String filename) {
 			int dix = filename.lastIndexOf('.');
 			if (dix < 0) {
@@ -133,11 +162,27 @@ public class LocalFileDialog {
 			}
 		}
 
+		/**
+		 * refresh file list for the current path.
+		 * 
+		 * @return number of files
+		 */
+		@SuppressLint("DefaultLocale")
 		private int refreshFileList() {
+
+			// callback to show the current path on the dialog
+			Bundle bundle = new Bundle();
+			bundle.putString("path", mPath);
+			bundle.putBoolean("title", true);
+			// call the callback
+			this.mCallback.callback(bundle);
+
 			// refresh file list
 			File[] files = null;
 			try {
+				// list all files
 				files = new File(mPath).listFiles();
+				// sort by name
 				Arrays.sort(files, new Comparator<File>() {
 
 					@Override
@@ -167,14 +212,14 @@ public class LocalFileDialog {
 			ArrayList<Map<String, Object>> lfolders = new ArrayList<Map<String, Object>>();
 			ArrayList<Map<String, Object>> lfiles = new ArrayList<Map<String, Object>>();
 
-			// add root directory, and back to parent direcotry
+			// add default directory
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("name", mPathDefault);
 			map.put("path", mPathDefault);
 			map.put("img", mContext.getString(R.string.fa_folder));
 			map.put("icon_color", "#628EAE");
 			mList.add(map);
-
+			// add back to parent directory
 			map = new HashMap<String, Object>();
 			map.put("name", mPathParent);
 			map.put("path", mPath);
@@ -237,17 +282,16 @@ public class LocalFileDialog {
 
 			String pt = (String) mList.get(position).get("path");
 			String fn = (String) mList.get(position).get("name");
-			if (fn.equals(mPathDefault) || fn.equals(mPathParent)) {
-				// if root or parent directory
+			if (fn.equals(mPathParent)) {
 				File fl = new File(pt);
 				String ppt = fl.getParent();
 				if (ppt != null) {
 					// back to parent
 					mPath = ppt;
-				} else {
-					// back to root
-					mPath = mPathDefault;
 				}
+			} else if (fn.equals(mPathDefault)) {
+				// if default directory
+				mPath = mPathDefault;
 			} else {
 
 				File fl = new File(pt);
@@ -272,6 +316,11 @@ public class LocalFileDialog {
 	}
 }
 
+/**
+ * local file adapter to set the icon edit text's font to fontawesome
+ * @author Jescy
+ *
+ */
 class LocalFileAdatper extends SimpleAdapter {
 
 	private Context mContext = null;
@@ -286,6 +335,7 @@ class LocalFileAdatper extends SimpleAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		//set the icon edit text's font to fontawesome
 		Map<String, Object> map = mDatas.get(position);
 		View res = super.getView(position, convertView, parent);
 		TextView textView = (TextView) res

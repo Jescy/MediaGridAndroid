@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.dismantle.mediagrid.ChooseMemberActivity"
+            android:name="com.dismantle.mediagrid.ChooseRecipientActivity"
             android:screenOrientation="locked"
             android:label="@string/app_name" >
         </activity>

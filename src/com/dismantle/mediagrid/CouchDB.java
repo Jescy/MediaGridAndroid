@@ -12,11 +12,28 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * CouchDB data provider.
+ * 
+ * @author Jescy
+ * 
+ */
 public class CouchDB {
+	/**
+	 * HTTP service provider.
+	 */
 	private static HttpService mHttpService = HttpService.getInstance();
 
-	// POST /_session
-	// params: name,password
+	/**
+	 * login with username and password.
+	 * POST /_session 
+	 * params: name,password
+	 * 
+	 * @param username user name
+	 * @param password password
+	 * @return user's name, role.
+	 * @throws JSONException
+	 */
 	public static JSONObject login(String username, String password)
 			throws JSONException {
 		JSONObject args = new JSONObject();
@@ -26,20 +43,37 @@ public class CouchDB {
 		return user;
 	}
 
-	// DELETE /_session
+	/**
+	 * log out from CouchDB
+	 * DELETE /_session
+	 * @return 
+	 */
 	public static JSONObject logout() {
 		JSONObject jsonObject = mHttpService.doDelete("/_session");
 		return jsonObject;
 	}
 
-	// GET /_session
+	/**
+	 * get session from CouchDB, to avoid login every time.
+	 * GET /_session
+	 * @return if username, then success.
+	 */
 	public static JSONObject getSession() {
 		JSONObject user = mHttpService.doGet("/_session");
 		return user;
 	}
 
-	// POST /media/_design/media/_view/files?descending=true&update_seq=true
-	// params: keys
+	/**
+	 * get file list.
+	 * POST /media/_design/media/_view/files?descending=true&update_seq=true
+	 * params: keys
+	 * 
+	 * @param descending order by descending.
+	 * @param update_seq update sequence number.
+	 * @param keys paths of the folder.
+	 * @return list of files.
+	 * @throws Exception
+	 */
 	public static JSONObject getFiles(boolean descending, boolean update_seq,
 			String keys) throws Exception {
 
@@ -56,8 +90,16 @@ public class CouchDB {
 		return resJson;
 	}
 
-	// POST /media
-	// params: name,dir,type,created_at:
+	/**
+	 * create directory 
+	 * POST /media
+	 * params: name,dir,type,created_at
+	 * @param name name of directory.
+	 * @param dir path of the directory
+	 * @param created_at created time.
+	 * @return JsonObject indicating success or not.
+	 * @throws JSONException
+	 */
 	public static JSONObject createDir(String name, String dir,
 			String created_at) throws JSONException {
 
@@ -72,8 +114,15 @@ public class CouchDB {
 		return resJson;
 	}
 
-	// POST /media/_design/media/_update/file
-	// params: type, dir
+	
+	/**
+	 * create a file document for uploading attachments.
+	 * POST /media/_design/media/_update/file
+	 * params: type, dir
+	 * @param dir path of the file document.
+	 * @return	JsonObject indicating success or not.
+	 * @throws JSONException
+	 */
 	public static JSONObject createFileDocument(String dir)
 			throws JSONException {
 		String url = "/media/_design/media/_update/file";
@@ -84,22 +133,37 @@ public class CouchDB {
 
 		mHttpService.doPostForm(url, args);
 		JSONObject resJson = new JSONObject();
+		//id and rev information is included in HTTP's header.
 		String id = mHttpService.getHeader("X-Couch-Id");
 		String rev = mHttpService.getHeader("X-Couch-Update-NewRev");
 		resJson.put("id", id);
 		resJson.put("rev", rev);
 		return resJson;
 	}
-
+	/**
+	 * download file from CouchDB.
+	 * @param url	url of the file in Server.
+	 * @param path local path of the file.
+	 * @return	true when success
+	 */
 	public static boolean doDownloadFile(String url, String path) {
 		int pos = url.lastIndexOf("/");
-		String name = url.substring(pos+1);
-		url = url.substring(0, pos+1);
+		String name = url.substring(pos + 1);
+		url = url.substring(0, pos + 1);
 		return mHttpService.doDownloadFile(url, name, path);
 	}
 
-	// POST /media/{id}?_attachments={name}&_rev={rev}
-	// params payload
+	
+	/**
+	 * upload a file to the corresponding document.
+	 * POST /media/{id}?_attachments={name}&_rev={rev}
+	 * params payload
+	 * @param id	document id.
+	 * @param rev document version.
+	 * @param path local path of the file to upload.
+	 * @return	JsonObject indicating success or not.
+	 * @throws Exception 
+	 */
 	public static JSONObject upload(String id, String rev, String path)
 			throws Exception {
 		JSONObject resJson = null;
@@ -118,6 +182,14 @@ public class CouchDB {
 
 	// PUT /_users/org.couchdb.user:name
 	// params:_id,name,password,roles,type
+	/**
+	 * register with name and password.
+	 * @param name name of user
+	 * @param passowrd password of user
+	 * @param type user type
+	 * @return JsonObject indicating success or not.
+	 * @throws JSONException
+	 */
 	public static JSONObject register(String name, String passowrd, String type)
 			throws JSONException {
 		String userPrefix = "org.couchdb.user:";
@@ -134,7 +206,13 @@ public class CouchDB {
 		return resJson;
 	}
 
-	// GET /chat/username
+
+	/** 
+	 * get user document.
+	 * GET /chat/username
+	 * @param username user name
+	 * @return JsonObject containing user document.
+	 */
 	public static JSONObject getUserDoc(String username) {
 		String url = "/chat/" + username;
 		JSONObject resJson = mHttpService.doGet(url);
@@ -143,6 +221,17 @@ public class CouchDB {
 
 	// PUT /chat/userid
 	// params:_id,_rev,key,rooms,left,type
+	/**
+	 * save a user's document.
+	 * @param userID user's ID
+	 * @param rev user document's version.
+	 * @param key public key of user
+	 * @param type type of user
+	 * @param rooms rooms user has logged.
+	 * @param left rooms that user has left.
+	 * @return	JsonObject indicating success or not.
+	 * @throws JSONException
+	 */
 	public static JSONObject saveUserDoc(String userID, String rev, String key,
 			String type, Vector<String> rooms, Vector<String> left)
 			throws JSONException {
@@ -160,23 +249,38 @@ public class CouchDB {
 		return resJson;
 	}
 
-	// GET /chat/motd
+	
+	/**
+	 * get message of the day.
+	 * GET /chat/motd
+	 * @return
+	 */
 	public static JSONObject getMOTD() {
 		String url = "/chat/motd";
 		JSONObject resJson = mHttpService.doGet(url);
 		return resJson;
 	}
 
-	// GET /chat
-	// database information
+	/**
+	 * get chat database information(for update sequence number)
+	 * GET /chat
+	 * @return JsonObject containing database information.
+	 */
 	public static JSONObject getChatDBInfo() {
 		String url = "/chat";
 		JSONObject resJson = mHttpService.doGet(url);
 		return resJson;
 	}
 
-	// GET /_changes
-	// for chat message
+	/**
+	 * long polling for chat items. If chat database changed, returns the
+	 * message document's first and last ID.
+	 * GET /_changes?heartbeat=10000&filter=chat/chat&room=General&feed=longpoll&since=474
+	 * 
+	 * @param since update sequence number
+	 * @param room room name.
+	 * @return If chat database changed, returns the message documents' first and last ID.
+	 */
 	public static JSONObject longPollingChat(int since, String room) {
 		String url = "/chat/_changes?";
 		url += "heartbeat=" + GlobalUtil.HEART_BEAT_INTERVAL;
@@ -188,9 +292,13 @@ public class CouchDB {
 		return resJson;
 	}
 
-	// GET /_changes
-	// for IM message
-	// http://127.0.0.1:5984/chat/_changes?heartbeat=10000&filter=chat%2Fim&include_docs=true&feed=longpoll&since=407
+	 
+	/**
+	 * long polling for instant messages. If any, returns the new instant message.
+	 * GET /_changes?heartbeat=10000&filter=chat%2Fim&include_docs=true&feed=longpoll&since=407
+	 * @param since update sequence number.
+	 * @return the new instant message.
+	 */
 	public static JSONObject longPollingIM(int since) {
 		String url = "/chat/_changes?";
 		url += "heartbeat=" + GlobalUtil.HEART_BEAT_INTERVAL;
@@ -202,8 +310,15 @@ public class CouchDB {
 		return resJson;
 	}
 
-	// GET /_changes
-	// for user list
+
+	/**
+	 * long polling for user list. If user list changed, returns the newly
+	 * updated user list.
+	 * GET /_changes?heartbeat=10000&filter=chat%2Fuser&include_docs=true&room=General&feed=longpoll&since=476
+	 * @param since update sequence number.
+	 * @param room room name.
+	 * @return the newly updated user list.
+	 */
 	public static JSONObject longPollingUser(int since, String room) {
 		String url = "/chat/_changes?";
 		url += "heartbeat=" + GlobalUtil.HEART_BEAT_INTERVAL;
@@ -218,6 +333,12 @@ public class CouchDB {
 
 	// GET /_changes
 	// for file list
+	/**
+	 * long polling for the file list.
+	 * GET /media/_changes?heartbeat=10000&feed=longpoll&since=16
+	 * @param since update sequence number
+	 * @return the updated file list.
+	 */
 	public static JSONObject longPollingFile(int since) {
 		String url = "/media/_changes?";
 		url += "heartbeat=" + GlobalUtil.HEART_BEAT_INTERVAL;
@@ -227,8 +348,16 @@ public class CouchDB {
 		return resJson;
 	}
 
-	// GET /chat/_design/_view/msgs
-	// for new message
+	/**
+	 * get messages by first and last message ID.
+	 * GET /chat/_design/_view/msgs
+	 * @param room room name
+	 * @param username user name
+	 * @param firstMsg first message ID
+	 * @param lastMsg last message ID
+	 * @return JsonObject containing messages.
+	 */
+	@SuppressWarnings("deprecation")
 	public static JSONObject getMsgs(String room, String username,
 			String firstMsg, String lastMsg) {
 		String url = "/chat/_design/chat/_view/msgs?";
@@ -251,78 +380,17 @@ public class CouchDB {
 		return resJson;
 	}
 
-	// POST /chat/_design/chat/_update/chatitem
-	// params:
-	// post chat message
+
+	/**
+	 * post message to server.
+	 * POST /chat/_design/chat/_update/chatitem
+	 * @param msg message to post
+	 * @return JsonObject indicating success or not.
+	 */
 	public static JSONObject postMsg(JSONObject msg) {
 		String url = "/chat/_design/chat/_update/chatitem";
 		JSONObject resJson = mHttpService.doPostForm(url, msg.toString());
 		return resJson;
-	}
-
-	public static JSONArray getFileList() throws Exception {
-
-		JSONArray list = null;
-		String strData = "[{'file_name':'Photo',		'file_size':0,		'upload_time':'2013/06/01 10:01'},"
-				+ "{'file_name':'Photo',		'file_size':0,		'upload_time':'2013/11/02 09:01'},"
-				+ "{'file_name':'Camera',		'file_size':0,		'upload_time':'2013/05/03 09:20'},"
-				+ "{'file_name':'MyFile',		'file_size':0,		'upload_time':'2012/03/03 09:40'},"
-				+ "{'file_name':'Document.docx','file_size':3068,	'upload_time':'2013/08/18 09:00'},"
-				+ " {'file_name':'ReadMe.txt',	'file_size':1234,	'upload_time':'2014/03/03 10:28'}]";
-		list = new JSONArray(strData);
-
-		return list;
-	}
-
-	public static JSONArray getMsgList() throws Exception {
-		JSONArray list = null;
-		String strData = "[{'chat_from':'John',		'chat_to':'Jescy',		'chat_time':'03/03 09:00','chat_msg':'How are you, Jescy?'},"
-				+ "{'chat_from':'Jescy',	'chat_to':'John',		'chat_time':'03/03 09:02','chat_msg':'Good, would you like to come to my house for a party tonight?'},"
-				+ "{'chat_from':'John',		'chat_to':'Jescy',		'chat_time':'03/03 09:00','chat_msg':'How are you, Jescy?'},"
-				+ "{'chat_from':'John',		'chat_to':'Jescy',		'chat_time':'03/03 09:00','chat_msg':'How are you, Jescy?'},"
-				+ "{'chat_from':'John',		'chat_to':'Jescy',		'chat_time':'03/03 09:00','chat_msg':'How are you, Jescy?'},"
-				+ "{'chat_from':'John',		'chat_to':'Jescy',		'chat_time':'03/03 09:00','chat_msg':'How are you, Jescy?'}]";
-		list = new JSONArray(strData);
-		return list;
-	}
-
-	public static JSONArray getMemberList() throws Exception {
-		JSONArray list = null;
-
-		String strData = "[{'member_name':'John'},"
-				+ "{'member_name':'Jescy'}," + "{'member_name':'Magie'},"
-				+ "{'member_name':'Maria'}," + "{'member_name':'Dara'},"
-				+ "{'member_name':'John'}," + "{'member_name':'John'},"
-				+ "{'member_name':'John'}]";
-
-		list = new JSONArray(strData);
-		return list;
-	}
-
-	// handle tags
-	static String delteTags(String input) {
-		int i = 0;
-		while (input.charAt(i++) != '<')
-			;
-		while (input.charAt(i++) != '>')
-			;
-
-		while (input.charAt(i++) != '<')
-			;
-		while (input.charAt(i++) != '>')
-			;
-
-		int j = input.length() - 1;
-		while (input.charAt(j--) != '>')
-			;
-		while (input.charAt(j--) != '<')
-			;
-		j++;
-		if (i > j)
-			return "";
-		input = input.substring(i, j);
-		return input;
-
 	}
 
 }

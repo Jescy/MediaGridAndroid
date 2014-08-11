@@ -9,21 +9,39 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 public class IPDialog {
-	// ip input dialog
+	/**
+	 * server configure dialog
+	 * 
+	 * @param context
+	 *            activity context
+	 * @param title
+	 *            title of dialog
+	 * @param initIp
+	 *            initial ip address
+	 * @param initPort
+	 *            initial port number
+	 * @param listener
+	 *            input dialog callback listener
+	 */
 	public static void showIPInputDialog(final Context context,
 			final String title, final String initIp, final int initPort,
 			final onIPInputDialogProcess listener) {
+		// view layout
 		final View viewConfig = LayoutInflater.from(context).inflate(
 				R.layout.server_config, null);
+		// ip input text box
 		final EditText txtIP = (EditText) viewConfig.findViewById(R.id.txt_ip);
+		// port input text box
 		final EditText txtPort = (EditText) viewConfig
 				.findViewById(R.id.txt_port);
+		// message box to indicate bad format
 		final TextView tvBadFormat = (TextView) viewConfig
 				.findViewById(R.id.tv_bad_format);
+		// initialize
 		txtIP.setText(initIp);
 		txtPort.setText(String.valueOf(initPort));
 		tvBadFormat.setVisibility(TextView.INVISIBLE);
-
+		// server configure alert dialog
 		final AlertDialog alertDialog = new AlertDialog.Builder(context)
 				.setTitle(title)
 				.setView(viewConfig)
@@ -42,6 +60,7 @@ public class IPDialog {
 									listener.onIPInputCancel();
 							}
 						}).show();
+		//positive button on clicker listener
 		alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(
 				new View.OnClickListener() {
 					@Override
@@ -53,7 +72,7 @@ public class IPDialog {
 						boolean isGood = true;
 						int portNum = -1;
 						try {
-							// format of ip
+							// check the format of ip
 							if (ipNums.length == 4) {
 								for (int i = 0; i < 4; i++) {
 									int tmpNum = Integer.valueOf(ipNums[i]);
@@ -64,8 +83,7 @@ public class IPDialog {
 								}
 							} else
 								isGood = false;
-							// format of port
-
+							// check the format of port
 							if (isGood) {
 								portNum = Integer.valueOf(strPort);
 								if (portNum <= 0)
@@ -74,7 +92,7 @@ public class IPDialog {
 						} catch (NumberFormatException e) {
 							isGood = false;
 						}
-						if (isGood) {// good format
+						if (isGood) {// good format, execute callback
 							if (listener != null)
 								listener.onIPInputConfirm(strIP, portNum);
 							alertDialog.dismiss();

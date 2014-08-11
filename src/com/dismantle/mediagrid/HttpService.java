@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.List;
 
 import org.apache.http.Header;
@@ -34,32 +33,45 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.util.EncodingUtils;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.net.Uri;
-import android.util.Xml.Encoding;
 
 public class HttpService {
+	/**
+	 * server ip
+	 */
 	private String mServerIP = "127.0.0.1";
+	/**
+	 * server port
+	 */
 	private int mServerPort = 5984;
+	/**
+	 * basic url http://ip:port
+	 */
 	private String mBaseURL = "http://" + mServerIP + ":" + mServerPort;
+	/**
+	 * http service instance
+	 */
 	private static HttpService mHttpService = null;
+	/**
+	 * http client
+	 */
 	private DefaultHttpClient mHttpClient = null;
-	private DefaultHttpClient mPollingChatClient = null;
-	private DefaultHttpClient mPollingIMClient = null;
-	private DefaultHttpClient mPollingUserClient = null;
+	/**
+	 * http response
+	 */
 	private HttpResponse mHttpResponse = null;
 
 	private HttpService() {
 		mHttpClient = createHttpClient();
-		// mPollingChatClient = createHttpClient();
-		// mPollingIMClient = createHttpClient();
-		// mPollingUserClient = createHttpClient();
 	}
-
+	/**
+	 * create http client
+	 * @return
+	 */
 	private DefaultHttpClient createHttpClient() {
 		HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
@@ -75,28 +87,46 @@ public class HttpService {
 				params, schReg);
 		return new DefaultHttpClient(conMgr, params);
 	}
-
+	/**
+	 * get http service instance
+	 * @return
+	 */
 	public static HttpService getInstance() {
 		if (mHttpService == null)
 			mHttpService = new HttpService();
 		return mHttpService;
 	}
-
+	/**
+	 * reset server's ip and port
+	 * @param ip
+	 * @param port
+	 * @return
+	 */
 	public HttpService setServer(String ip, int port) {
 		mServerIP = ip;
 		mServerPort = port;
 		mBaseURL = "http://" + mServerIP + ":" + mServerPort;
 		return getInstance();
 	}
-
+	/**
+	 * get server ip
+	 * @return
+	 */
 	public String getServerIP() {
 		return mServerIP;
 	}
-
+	/**
+	 * get server port
+	 * @return
+	 */
 	public int getServerPort() {
 		return mServerPort;
 	}
-
+	/**
+	 * execute a get request
+	 * @param url url address
+	 * @return request's result
+	 */
 	public JSONObject doGet(String url) {
 		HttpGet httpGet = new HttpGet(mBaseURL + url);
 		httpGet.setHeader("Content-Type", "application/json");
@@ -111,7 +141,11 @@ public class HttpService {
 		}
 		return jsonObject;
 	}
-
+	/**
+	 * do a long polling get function
+	 * @param url url
+	 * @return request's result
+	 */
 	public JSONObject doGetPolling(String url) {
 
 		DefaultHttpClient client = createHttpClient();
@@ -134,7 +168,12 @@ public class HttpService {
 		}
 		return jsonObject;
 	}
-
+	/**
+	 * execute a post request
+	 * @param url url
+	 * @param args post argument
+	 * @return request's result
+	 */
 	public JSONObject doPost(String url, JSONObject args) {
 		HttpPost httppost = new HttpPost(mBaseURL + url);
 		JSONObject jsonObject = null;
@@ -157,6 +196,12 @@ public class HttpService {
 
 	// for those only supporting application/x-www-form-urlencoded, I dont know
 	// why the application/json is not working
+	/**
+	 * for those only supporting application/x-www-form-urlencoded, I dont know why the application/json is not working
+	 * @param url url
+	 * @param args argument
+	 * @return request's result
+	 */
 	public JSONObject doPostForm(String url, List<NameValuePair> args) {
 		HttpPost httppost = new HttpPost(mBaseURL + url);
 		JSONObject jsonObject = null;
@@ -176,7 +221,12 @@ public class HttpService {
 		}
 		return jsonObject;
 	}
-
+	/**
+	 * post with a string payload
+	 * @param url url 
+	 * @param payload payload string
+	 * @return request's result
+	 */
 	public JSONObject doPostForm(String url, String payload) {
 		HttpPost httppost = new HttpPost(mBaseURL + url);
 		JSONObject jsonObject = null;
@@ -198,7 +248,12 @@ public class HttpService {
 		}
 		return jsonObject;
 	}
-
+	/**
+	 * execute a put request
+	 * @param url url 
+	 * @param args arguments
+	 * @return request's result
+	 */
 	public JSONObject doPut(String url, JSONObject args) {
 		HttpPut httpput = new HttpPut(mBaseURL + url);
 		JSONObject jsonObject = null;
@@ -215,7 +270,11 @@ public class HttpService {
 		}
 		return jsonObject;
 	}
-
+	/**
+	 * execute a delete request
+	 * @param url url 
+	 * @return request's result
+	 */
 	public JSONObject doDelete(String url) {
 		HttpDelete httpDelete = new HttpDelete(mBaseURL + url);
 		JSONObject jsonObject = null;
@@ -229,7 +288,13 @@ public class HttpService {
 		}
 		return jsonObject;
 	}
-
+	/**
+	 * post a file to server
+	 * @param url url 
+	 * @param rev version
+	 * @param uploadFile file to upload
+	 * @return request's result
+	 */
 	public JSONObject doPostFile(String url, String rev, File uploadFile) {
 
 		ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
@@ -295,7 +360,13 @@ public class HttpService {
 		}
 		return jsonObject;
 	}
-
+	/**
+	 * download file
+	 * @param urlPath url
+	 * @param name name
+	 * @param path path
+	 * @return true if success
+	 */
 	public boolean doDownloadFile(String urlPath, String name, String path) {
 		try {
 
@@ -321,7 +392,11 @@ public class HttpService {
 		}
 		return true;
 	}
-
+	/**
+	 * get header of the request
+	 * @param headerName name of the header
+	 * @return header's content
+	 */
 	public String getHeader(String headerName) {
 		Header[] headers = mHttpResponse.getHeaders(headerName);
 		if (headers.length == 0)

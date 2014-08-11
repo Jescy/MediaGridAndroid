@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,12 +23,27 @@ import android.widget.TextView;
 import com.dismantle.mediagrid.IPDialog.onIPInputDialogProcess;
 import com.google.gson.Gson;
 
+@SuppressLint("HandlerLeak")
 public class LoginActivity extends ActionBarActivity {
-
+	/**
+	 * error promotion message
+	 */
 	private TextView mTvMSG = null;
+	/**
+	 * name buttons
+	 */
 	private Button[] mBtnNames = null;
+	/**
+	 * saved names
+	 */
 	private Vector<String> names = null;
+	/**
+	 * saved passwords
+	 */
 	private Vector<String> passwords = null;
+	/**
+	 * progress dialog 
+	 */
 	private ProgressDialog progressDialog = null;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,18 +54,22 @@ public class LoginActivity extends ActionBarActivity {
 		
 		setTitle(getString(R.string.media_grid));
 		
+		//get the server configure data from SharedPreferences
 		SharedPreferences sp = LoginActivity.this.getSharedPreferences(
 				"ServerConfig", MODE_PRIVATE);
 		String lastIP = sp.getString("IP", "127.0.0.1");
 		int lastPort = sp.getInt("port", 5984);
 		HttpService.getInstance().setServer(lastIP, lastPort);
-
+		//set server inital data
 		final TextView tvServer = (TextView) findViewById(R.id.tv_server);
 		tvServer.setText(lastIP + ":" + lastPort);
-
+		
 		Button btnConfig = (Button) findViewById(R.id.btn_config);
 		btnConfig.setTypeface(GlobalUtil.getFontAwesome(this));
 		btnConfig.setOnClickListener(new OnClickListener() {
+			/**
+			 * click to show the server configure
+			 */
 			@Override
 			public void onClick(View arg0) {
 				SharedPreferences sp = LoginActivity.this.getSharedPreferences(
@@ -81,11 +101,16 @@ public class LoginActivity extends ActionBarActivity {
 						});
 			}
 		});
+		
 		Button btnOK = (Button) findViewById(R.id.btn_login);
 		btnOK.setTypeface(GlobalUtil.getFontAwesome(this));
 		btnOK.setOnClickListener(new OnClickListener() {
+			/**
+			 * login button listener
+			 */
 			@Override
 			public void onClick(View arg0) {
+				//show progress dialog
 				final EditText txtUserName = (EditText) findViewById(R.id.txt_username);
 				progressDialog = ProgressDialog.show(LoginActivity.this, "Login...", "Please wait to login...");
 				progressDialog.setCancelable(true);
@@ -93,14 +118,16 @@ public class LoginActivity extends ActionBarActivity {
 
 					@Override
 					public void run() {
-						// String resString=HttpService.doGet("/_session");
+						
 						JSONObject res = null;
 						try {
+							//generate random password
 							String userName = txtUserName.getText().toString();
 							String password = GlobalUtil.genRandomPassword();
-							// register
+							// register to server
 							res = CouchDB.register(userName,
 									GlobalUtil.genRandomPassword(), "user");
+							// send result message
 							if (res.has("error")) {
 								GlobalUtil.sendMSG(handler,
 										GlobalUtil.MSG_REGISTER_NAME_TAKEN,
@@ -126,12 +153,17 @@ public class LoginActivity extends ActionBarActivity {
 
 			}
 		});
+		//initialize name buttons
 		initNames();
 		
 	}
 
 	@Override
+	/**
+	 * when resume, try login with session.
+	 */
 	protected void onResume() {
+		//try login with session.
 		loginWithSession();
 		super.onResume();
 	}
@@ -163,9 +195,10 @@ public class LoginActivity extends ActionBarActivity {
 			String password = "";
 			switch (msg.what) {
 			case GlobalUtil.MSG_GET_SESSION_FAILED:
-
+				//if get session fails
 				break;
 			case GlobalUtil.MSG_REGISTER_SUCCESS:
+				// if register success, then login with username and password
 				String strs[] = msg.obj.toString().split(":");
 				userName = strs[0];
 				password = strs[1];
@@ -176,10 +209,13 @@ public class LoginActivity extends ActionBarActivity {
 				userName = msg.obj.toString();
 				// get user document
 				getUserDoc(userName);
+				// dismiss dialog
 				progressDialog.dismiss();
 				break;
 			case GlobalUtil.MSG_GET_USER_DOC_SUCCESS:
+				// if get user document success
 				UserDoc userDoc = (UserDoc) msg.obj;
+				// start the main activity
 				Intent intent = new Intent(LoginActivity.this,
 						MainActivity.class);
 				Bundle bundle = new Bundle();
@@ -188,10 +224,12 @@ public class LoginActivity extends ActionBarActivity {
 				startActivity(intent);
 				break;
 			case GlobalUtil.MSG_REGISTER_NAME_TAKEN:
+				// if registered user name is already taken, show error message
 				mTvMSG.setText("user name already taken");
 				progressDialog.dismiss();
 				break;
 			case GlobalUtil.MSG_LOAD_FAILED:
+				// if failes, then promote to check network or server configure
 				mTvMSG.setText("Failed. Check your network or server configure");
 				progressDialog.dismiss();
 				break;
@@ -200,14 +238,16 @@ public class LoginActivity extends ActionBarActivity {
 			}
 		};
 	};
-
+	/**
+	 * initialize saved names from SharedPreferences
+	 */
 	private void initNames() {
 		mBtnNames = new Button[4];
 		mBtnNames[0] = (Button) findViewById(R.id.btn_name0);
 		mBtnNames[1] = (Button) findViewById(R.id.btn_name1);
 		mBtnNames[2] = (Button) findViewById(R.id.btn_name2);
 		mBtnNames[3] = (Button) findViewById(R.id.btn_name3);
-
+		// get saved names
 		SharedPreferences sp = LoginActivity.this.getSharedPreferences(
 				"SavedNames", MODE_PRIVATE);
 		names = new Vector<String>();
@@ -230,6 +270,7 @@ public class LoginActivity extends ActionBarActivity {
 				public void onClick(View btn) {
 					Button curButton = (Button) btn;
 					int id = curButton.getId();
+					//get index of button
 					int index = -1;
 					switch (id) {
 					case R.id.btn_name0:
@@ -247,6 +288,7 @@ public class LoginActivity extends ActionBarActivity {
 					default:
 						break;
 					}
+					//then login with name and password
 					String name = names.elementAt(index);
 					String password = passwords.elementAt(index);
 					login(name, password);
@@ -257,7 +299,11 @@ public class LoginActivity extends ActionBarActivity {
 		}
 
 	}
-
+	/**
+	 * save name and password into local storage
+	 * @param name name
+	 * @param password password
+	 */
 	private void saveName(String name, String password) {
 		names.insertElementAt(name, 0);
 		passwords.removeElementAt(passwords.size() - 1);
@@ -274,12 +320,15 @@ public class LoginActivity extends ActionBarActivity {
 		}
 		editor.commit();
 	}
-
+	/**
+	 * login with session
+	 */
 	private void loginWithSession() {
 		new Thread() {
 
 			@Override
 			public void run() {
+				//get session from server
 				JSONObject resJson = CouchDB.getSession();
 				try {
 					if (resJson != null) {
@@ -303,8 +352,13 @@ public class LoginActivity extends ActionBarActivity {
 
 		}.start();
 	}
-
+	/**
+	 * login with username and password
+	 * @param userName user name
+	 * @param password password
+	 */
 	private void login(final String userName, final String password) {
+		// show progress dialog
 		progressDialog = ProgressDialog.show(LoginActivity.this, "Login...", "Please wait to login...");
 		progressDialog.setCancelable(true);
 		
@@ -315,6 +369,7 @@ public class LoginActivity extends ActionBarActivity {
 				JSONObject res;
 				try {
 					res = CouchDB.login(userName, password);
+					//send result message
 					if (res.has("error")) {
 						GlobalUtil.sendMSG(handler,
 								GlobalUtil.MSG_LOGIN_FAILED, null);
@@ -332,7 +387,10 @@ public class LoginActivity extends ActionBarActivity {
 			}
 		}.start();
 	}
-
+	/**
+	 * get user document
+	 * @param userName
+	 */
 	private void getUserDoc(final String userName) {
 		new Thread() {
 
@@ -340,7 +398,7 @@ public class LoginActivity extends ActionBarActivity {
 			public void run() {
 				JSONObject res = CouchDB.getUserDoc(userName);
 				UserDoc userDoc = null;
-				if (res.has("error")) {// no document
+				if (res.has("error")) {// no document, then create a new one 
 					userDoc = new UserDoc();
 					userDoc.rooms.add("General");
 					userDoc._id = userName;

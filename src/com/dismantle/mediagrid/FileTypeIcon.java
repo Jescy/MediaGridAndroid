@@ -1,6 +1,14 @@
 package com.dismantle.mediagrid;
 
+/**
+ * get FontAwesome icon and color for a certain file extension.
+ * @author Jescy
+ *
+ */
 public class FileTypeIcon {
+	/**
+	 * map table from extension to icon and color.
+	 */
 	private static final Object[][] Icon_MapTable = {
 			{ ".zip", R.string.fa_file_archive_o, "#FFFF00" },
 			{ ".rar", R.string.fa_file_archive_o, "#FFFF00" },
@@ -45,18 +53,28 @@ public class FileTypeIcon {
 
 	};
 
-	public static int getIcon(String posix) {
-		posix = posix.toLowerCase();
+	/**
+	 * get icon by suffix
+	 * @param suffix suffix of file.
+	 * @return icon
+	 */
+	public static int getIcon(String suffix) {
+		suffix = suffix.toLowerCase();
 		for (int i = 0; i < Icon_MapTable.length; i++) {
-			if (posix.equals(Icon_MapTable[i][0]))
+			if (suffix.equals(Icon_MapTable[i][0]))
 				return (Integer) Icon_MapTable[i][1];
 		}
 		return R.string.fa_file;
 	}
-	public static String getColor(String posix) {
-		posix = posix.toLowerCase();
+	/**
+	 * get color by suffix.
+	 * @param suffix suffix of file
+	 * @return color
+	 */
+	public static String getColor(String suffix) {
+		suffix = suffix.toLowerCase();
 		for (int i = 0; i < Icon_MapTable.length; i++) {
-			if (posix.equals(Icon_MapTable[i][0]))
+			if (suffix.equals(Icon_MapTable[i][0]))
 			{
 				String color = (String) Icon_MapTable[i][2];
 				if(color.length()<7)

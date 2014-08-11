@@ -1,8 +1,6 @@
 package com.dismantle.mediagrid;
 
 import java.util.Locale;
-import java.util.zip.Inflater;
-
 import android.support.v7.app.ActionBar.Tab;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -10,11 +8,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.util.LayoutDirection;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
