@@ -14,10 +14,10 @@
         android:background="#336699" >
 
         <TextView
+            android:id="@+id/txt_path"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/path"
-            android:id="@+id/txt_path"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
     </LinearLayout>
@@ -27,11 +27,11 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:background="#F3F3F3"
         android:divider="@android:drawable/divider_horizontal_dark"
         android:orientation="horizontal"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
         android:showDividers="middle" >
 
         <Button
@@ -40,17 +40,17 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/button_basic_bg"
-            android:textColor="@android:color/white"
-            android:text="@string/upload" />
+            android:text="@string/upload"
+            android:textColor="@android:color/white" />
 
         <Button
             android:id="@+id/btn_mkdir"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="@android:color/white"
             android:background="@drawable/button_basic_bg"
-            android:text="@string/mkdir" />
+            android:text="@string/mkdir"
+            android:textColor="@android:color/white" />
     </LinearLayout>
 
     <com.dismantle.mediagrid.RTPullListView
@@ -59,8 +59,10 @@
         android:layout_height="fill_parent"
         android:layout_above="@id/layout_tools"
         android:layout_below="@id/layout_path"
+        android:animationCache="false"
         android:divider="#000000"
-        android:dividerHeight="1dp" >
+        android:dividerHeight="1dp"
+        android:scrollingCache="false" >
     </com.dismantle.mediagrid.RTPullListView>
 
 </RelativeLayout>

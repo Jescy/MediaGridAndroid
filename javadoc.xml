@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="private" author="true" classpath="libs/gson-2.2.4.jar;../android-support-v7-appcompat/libs/android-support-v7-appcompat.jar;../android-support-v7-appcompat/bin/android-support-v7-appcompat.jar;libs/android-support-v7-gridlayout.jar;libs/android-support-v4.jar;D:/adt-bundle-windows-x86_64-20131030/sdk/platforms/android-19/android.jar" destdir="doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="com.dismantle.mediagrid,android.support.v7.appcompat" source="1.7" sourcepath="gen;src" splitindex="true" use="true" version="true">
+            <link href="file:/D:/mediaworkspace/MediaGrid/doc/"/>
+        </javadoc>
+    </target>
+</project>

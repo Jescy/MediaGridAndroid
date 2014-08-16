@@ -112,8 +112,6 @@ public class LoginActivity extends ActionBarActivity {
 			public void onClick(View arg0) {
 				//show progress dialog
 				final EditText txtUserName = (EditText) findViewById(R.id.txt_username);
-				progressDialog = ProgressDialog.show(LoginActivity.this, "Login...", "Please wait to login...");
-				progressDialog.setCancelable(true);
 				new Thread() {
 
 					@Override
@@ -206,11 +204,13 @@ public class LoginActivity extends ActionBarActivity {
 				break;
 			case GlobalUtil.MSG_GET_SESSION_SUCCESS:
 			case GlobalUtil.MSG_LOGIN_SUCCESS:
+				if(progressDialog!=null)
+					progressDialog.dismiss();
 				userName = msg.obj.toString();
 				// get user document
 				getUserDoc(userName);
 				// dismiss dialog
-				progressDialog.dismiss();
+				
 				break;
 			case GlobalUtil.MSG_GET_USER_DOC_SUCCESS:
 				// if get user document success
@@ -226,12 +226,14 @@ public class LoginActivity extends ActionBarActivity {
 			case GlobalUtil.MSG_REGISTER_NAME_TAKEN:
 				// if registered user name is already taken, show error message
 				mTvMSG.setText("user name already taken");
-				progressDialog.dismiss();
+				if(progressDialog!=null)
+					progressDialog.dismiss();
 				break;
 			case GlobalUtil.MSG_LOAD_FAILED:
 				// if failes, then promote to check network or server configure
 				mTvMSG.setText("Failed. Check your network or server configure");
-				progressDialog.dismiss();
+				if(progressDialog!=null)
+					progressDialog.dismiss();
 				break;
 			default:
 				break;

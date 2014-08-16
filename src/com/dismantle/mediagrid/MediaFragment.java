@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,9 +31,9 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,7 +58,7 @@ public class MediaFragment extends Fragment {
 	/**
 	 * list view adapter
 	 */
-	private SimpleAdapter mAdapter = null;
+	private MediaSimpleAdapter mAdapter = null;
 	/**
 	 * current paths
 	 */
@@ -115,11 +114,12 @@ public class MediaFragment extends Fragment {
 
 		mDatalist = new ArrayList<Map<String, Object>>();
 		// create adapter for file list
-		mAdapter = new MediaSimpleAdapter(thisActivity, mDatalist,
-				R.layout.media_list_item, new String[] { "file_ico",
-						"file_name", "file_size", "upload_time" }, new int[] {
-						R.id.file_ico, R.id.file_name, R.id.file_size,
-						R.id.upload_time });
+//		mAdapter = new MediaSimpleAdapter(thisActivity, mDatalist,
+//				R.layout.media_list_item, new String[] { "file_ico",
+//						"file_name", "file_size", "upload_time" }, new int[] {
+//						R.id.file_ico, R.id.file_name, R.id.file_size,
+//						R.id.upload_time });
+		mAdapter = new MediaSimpleAdapter(getActivity(),mDatalist);
 		// initialize pull list view
 		mPullListView = (RTPullListView) rootView.findViewById(R.id.file_list);
 		mPullListView.setAdapter(mAdapter);
@@ -198,12 +198,14 @@ public class MediaFragment extends Fragment {
 			// get file list
 			ArrayList<Map<String, Object>> files = (ArrayList<Map<String, Object>>) msg
 					.getData().getSerializable("files");
-			if (mProgressDialog != null && mProgressDialog.isShowing())
-				mProgressDialog.dismiss();
+			
 			switch (msg.what) {
 			case GlobalUtil.MSG_LOAD_SUCCESS:
 				// if load file success, then add dirs and files to list, then
 				// refresh
+				if (mProgressDialog != null && mProgressDialog.isShowing())
+					mProgressDialog.dismiss();
+				
 				mDatalist.clear();
 				mDatalist.addAll(dirs);
 				mDatalist.addAll(files);
@@ -221,7 +223,7 @@ public class MediaFragment extends Fragment {
 			case GlobalUtil.MSG_CREATE_DIR_SUCCESS:
 				// if create directory success, then load file again to refresh
 				// files, then show a toast promotion.
-				loadFiles();
+				//loadFiles();
 				if (isAdded())
 					Toast.makeText(getActivity(),
 							getResources().getString(R.string.makedir_success),
@@ -230,7 +232,7 @@ public class MediaFragment extends Fragment {
 			case GlobalUtil.MSG_UPLOAD_SUCCESS:
 				// if upload file success, then load file again to refresh
 				// files, then show a toast promotion.
-				loadFiles();
+				//loadFiles();
 				if (isAdded())
 					Toast.makeText(getActivity(),
 							getResources().getString(R.string.upload_success),
@@ -239,6 +241,8 @@ public class MediaFragment extends Fragment {
 				break;
 			case GlobalUtil.MSG_DOWNLOAD_SUCCESS:
 				// if download file success, then show a toast promotion.
+				if (mProgressDialog != null && mProgressDialog.isShowing())
+					mProgressDialog.dismiss();
 				if (isAdded())
 					Toast.makeText(
 							getActivity(),
@@ -247,10 +251,22 @@ public class MediaFragment extends Fragment {
 				break;
 			case GlobalUtil.MSG_DOWNLOAD_FAILED:
 				// if download file fails, then show a toast promotion.
+				if (mProgressDialog != null && mProgressDialog.isShowing())
+					mProgressDialog.dismiss();
 				if (isAdded())
 					Toast.makeText(getActivity(),
 							getResources().getString(R.string.download_failed),
 							Toast.LENGTH_SHORT).show();
+				break;
+			case GlobalUtil.MSG_LOAD_FAILED:
+				if (mProgressDialog != null && mProgressDialog.isShowing())
+					mProgressDialog.dismiss();
+				if (isAdded())
+					Toast.makeText(getActivity(),
+							getResources().getString(R.string.load_failed),
+							Toast.LENGTH_SHORT).show();
+				GlobalUtil.sleepFor(GlobalUtil.RECONNECT_INTERVAL);
+				loadFiles();
 				break;
 			default:
 				break;
@@ -278,8 +294,7 @@ public class MediaFragment extends Fragment {
 						myHandler.sendEmptyMessage(GlobalUtil.MSG_LOAD_FAILED);
 						return;
 					}
-					// get update sequence number
-					mUpdateSeq = jsonObject.getInt("update_seq");
+					
 					// get file list and directory list
 					JSONArray jsonArray = jsonObject.getJSONArray("rows");
 					ArrayList<Map<String, Object>> files = new ArrayList<Map<String, Object>>();
@@ -590,12 +605,27 @@ public class MediaFragment extends Fragment {
 
 			@Override
 			public void run() {
+				try{
 				//if media database changes, then polling returns
 				JSONObject resJson = CouchDB.longPollingFile(seq);
-				Message msg = new Message();
-				msg.what = GlobalUtil.MSG_POLLING_FILE;
-				msg.obj = resJson;
-				myHandler.sendMessage(msg);
+				
+				if(resJson!=null && !resJson.has("error"))
+				{
+					// get update sequence number
+					mUpdateSeq = resJson.getInt("last_seq");
+					
+					Message msg = new Message();
+					msg.what = GlobalUtil.MSG_POLLING_FILE;
+					msg.obj = resJson;
+					myHandler.sendMessage(msg);
+				}else {
+					myHandler.sendEmptyMessage(GlobalUtil.MSG_LOAD_FAILED);
+				}
+				}catch(Exception e)
+				{
+					myHandler.sendEmptyMessage(GlobalUtil.MSG_LOAD_FAILED);
+				}
+				
 			}
 
 		}.start();
@@ -606,27 +636,77 @@ public class MediaFragment extends Fragment {
  * @author Jescy
  *
  */
-class MediaSimpleAdapter extends SimpleAdapter {
+class MediaSimpleAdapter extends BaseAdapter {
 
 	private Context mContext = null;
 	private List<? extends Map<String, Object>> mDatas = null;
-
+	private LayoutInflater mInflater;
 	public MediaSimpleAdapter(Context context,
-			List<? extends Map<String, Object>> data, int resource,
-			String[] from, int[] to) {
-		super(context, data, resource, from, to);
+			List<? extends Map<String, Object>> data) {
 		mDatas = data;
 		mContext = context;
+		mInflater = LayoutInflater.from(context);
 	}
 
+
+	@Override
+	public int getCount() {
+		return mDatas.size();
+	}
+
+	@Override
+	public Object getItem(int arg0) {
+		return mDatas.get(arg0);
+	}
+
+	@Override
+	public long getItemId(int arg0) {
+		return arg0;
+	}
 	public View getView(int position, View convertView, ViewGroup parent) {
 		//set the list item's icon and color.
 		Map<String, Object> map = mDatas.get(position);
-		View res = super.getView(position, convertView, parent);
-		TextView textView = (TextView) res.findViewById(R.id.file_ico);
-		textView.setTypeface(GlobalUtil.getFontAwesome(mContext));
+		ViewHolder viewHolder = null;
+		if (convertView == null) {
+			viewHolder = new ViewHolder();
+				/*new MediaSimpleAdapter(thisActivity, mDatalist,
+				R.layout.media_list_item, new String[] { "file_ico",
+						"file_name", "file_size", "upload_time" }, new int[] {
+						R.id.file_ico, R.id.file_name, R.id.file_size,
+						R.id.upload_time })*/
+				convertView = mInflater.inflate(R.layout.media_list_item, null);
+				viewHolder.tvName = (TextView) convertView
+						.findViewById(R.id.file_name);
+				viewHolder.tvIcon = (TextView)convertView.findViewById(R.id.file_ico);
+				viewHolder.tvSize =(TextView)convertView.findViewById(R.id.file_size);
+				viewHolder.tvTime =(TextView)convertView.findViewById(R.id.upload_time);
+				viewHolder.tvIcon.setTypeface(GlobalUtil.getFontAwesome(mContext));
+				convertView.setTag(viewHolder);
+			
+		} else {
+			viewHolder = (ViewHolder) convertView.getTag();
+		}
+		
+		viewHolder.tvName.setText(map.get("file_name").toString());
+		viewHolder.tvIcon.setText(map.get("file_ico").toString());
+		viewHolder.tvSize.setText(map.get("file_size").toString());
+		viewHolder.tvTime.setText(map.get("upload_time").toString());
+		
 		Object color = map.get("icon_color");
-		textView.setTextColor(Color.parseColor(color.toString()));
-		return res;
+		viewHolder.tvIcon.setTextColor(Color.parseColor(color.toString()));
+		return convertView;
+	}
+
+	/**
+	 * ViewHolder to hold views, containing user name and message content.
+	 * 
+	 * @author Jescy
+	 * 
+	 */
+	static class ViewHolder {
+		public TextView tvName = null;
+		public TextView tvSize = null;
+		public TextView tvIcon = null;
+		public TextView tvTime = null;
 	}
 }

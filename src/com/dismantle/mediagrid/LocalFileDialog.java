@@ -272,7 +272,7 @@ public class LocalFileDialog {
 					new int[] { R.id.filedialogitem_icon,
 							R.id.filedialogitem_name });
 			this.setAdapter(adapter);
-
+			setBackgroundColor(getResources().getColor(R.color.blue_background));
 			return files.length;
 		}
 
