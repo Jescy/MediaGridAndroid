@@ -151,8 +151,6 @@ public class LoginActivity extends ActionBarActivity {
 
 			}
 		});
-		//initialize name buttons
-		initNames();
 		
 	}
 
@@ -161,6 +159,8 @@ public class LoginActivity extends ActionBarActivity {
 	 * when resume, try login with session.
 	 */
 	protected void onResume() {
+		//init name buttons
+		initNames();
 		//try login with session.
 		loginWithSession();
 		super.onResume();

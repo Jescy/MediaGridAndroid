@@ -6,30 +6,38 @@
     android:background="@color/blue_background"
     android:orientation="vertical" >
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="40dp"
-        android:layout_marginTop="40dp"
-        android:text="@string/app_name"
-        android:textSize="40sp"
-        android:textColor="@color/blue_basic"
-        android:textStyle="bold" />
+        android:layout_weight="0.8"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="20dp"
+            android:text="@string/app_name"
+            android:textColor="@color/blue_basic"
+            android:textSize="40sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="300dp"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_weight="0.8"
         android:gravity="center_horizontal"
         android:orientation="vertical" >
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="left"
             android:layout_marginBottom="10dp"
             android:text="@string/pick_name"
-            android:layout_gravity="left"
             android:textSize="15sp" >
         </TextView>
 
@@ -39,103 +47,112 @@
             android:orientation="horizontal" >
 
             <EditText
+                android:id="@+id/txt_username"
                 android:layout_width="0dp"
-                android:layout_weight="3.5"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
-                android:id="@+id/txt_username"
-                 android:singleLine="true"
+                android:layout_weight="3.5"
                 android:background="@drawable/chat_input_bg"
-                android:hint="@string/hint_input_name" />
+                android:hint="@string/hint_input_name"
+                android:singleLine="true" />
 
             <Button
                 android:id="@+id/btn_login"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:background="@drawable/button_basic_bg"
-                android:textColor="@android:color/white"
                 android:layout_gravity="right"
-                android:text="Login" />
+                android:layout_weight="1"
+                android:background="@drawable/button_basic_bg"
+                android:text="Login"
+                android:textColor="@android:color/white" />
         </LinearLayout>
 
         <TextView
+            android:id="@+id/tv_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="left"
             android:layout_marginBottom="10dp"
             android:text=""
             android:textColor="#CC0000"
-            android:id="@+id/tv_msg"
-            android:layout_gravity="left"
             android:textSize="15sp" >
         </TextView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.9"
+        android:gravity="center_horizontal"
+        android:orientation="vertical" >
 
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:orientation="horizontal" >
 
             <Button
-                style="@style/saved_names_button_style"
                 android:id="@+id/btn_name0"
+                style="@style/saved_names_button_style"
                 android:layout_marginRight="5dp"
                 android:text="@string/testuserA" />
 
             <Button
-                style="@style/saved_names_button_style"
-                android:focusable="true"
                 android:id="@+id/btn_name1"
+                style="@style/saved_names_button_style"
                 android:layout_marginLeft="5dp"
+                android:focusable="true"
                 android:text="@string/testuserB" />
-
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:orientation="horizontal" >
 
             <Button
-                style="@style/saved_names_button_style"
                 android:id="@+id/btn_name2"
+                style="@style/saved_names_button_style"
                 android:layout_marginRight="5dp"
                 android:text="@string/testuserA" />
 
             <Button
-                style="@style/saved_names_button_style"
                 android:id="@+id/btn_name3"
+                style="@style/saved_names_button_style"
                 android:layout_marginLeft="5dp"
                 android:text="@string/testuserB" />
-
         </LinearLayout>
+    </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="2dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="0.5"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/tv_server"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="2dp"
-            android:layout_marginTop="30dp"
-            android:orientation="horizontal" >
+            android:layout_weight="3.5"
+            android:gravity="right"
+            android:text="@string/test_server"
+            android:textSize="15sp" />
 
-            <TextView
-                android:id="@+id/tv_server"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3.5"
-                android:text="@string/test_server"
-                android:gravity="right"
-                android:textSize="15sp" />
-
-            <Button
-                android:id="@+id/btn_config"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:background="@drawable/button_basic_bg"
-                android:text="@string/fa_cog"
-                android:textSize="15sp" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/btn_config"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_basic_bg"
+            android:text="@string/fa_cog"
+            android:textSize="15sp" />
     </LinearLayout>
 
 </LinearLayout>
