@@ -11,6 +11,7 @@ Install from APK
 1. Download APK from  MediaGridAndroid/bin, then copy it to your Android device, and click to install.
 2. Open the MediaGridAndroid, then click the configure button on the login page, input your computer's IP and port(i.e. 192.168.1.100:5984).
 3. Login with your user name to explore more.
+4. If in Windows, DO REMEBER to shut down your Windows FireWall, or add exception for port 5984 for CouchDB service.
 
 Install from source code
 ================
